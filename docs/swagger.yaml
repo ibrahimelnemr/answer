@@ -1138,6 +1138,8 @@ definitions:
         type: boolean
       slug_name:
         type: string
+      tag_id:
+        type: string
     type: object
   schema.GetTagPageResp:
     properties:
@@ -2489,6 +2491,7 @@ definitions:
         type: string
       username:
         maxLength: 30
+        minLength: 2
         type: string
       website:
         maxLength: 500
@@ -4832,7 +4835,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: GetEmbedConfig
+      description: get embed plugin config
       produces:
       - application/json
       responses:
@@ -4847,9 +4850,9 @@ paths:
                     $ref: '#/definitions/plugin.EmbedConfig'
                   type: array
               type: object
-      summary: GetEmbedConfig
+      summary: get embed plugin config
       tags:
-      - PluginEmbed
+      - Plugin
   /answer/api/v1/file:
     post:
       consumes:
@@ -6037,7 +6040,6 @@ paths:
             $ref: '#/definitions/handler.RespBody'
       security:
       - ApiKeyAuth: []
-      - ApiKeyAuth: []
       summary: add report
       tags:
       - Report
@@ -6061,7 +6063,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.RespBody'
       security:
-      - ApiKeyAuth: []
       - ApiKeyAuth: []
       summary: review report
       tags:
@@ -6120,7 +6121,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.RespBody'
       security:
-      - ApiKeyAuth: []
       - ApiKeyAuth: []
       summary: update review
       tags:
@@ -6489,6 +6489,30 @@ paths:
       summary: update tag
       tags:
       - Tag
+  /answer/api/v1/tag/merge:
+    post:
+      consumes:
+      - application/json
+      description: merge tag
+      parameters:
+      - description: tag
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/schema.AddTagReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RespBody'
+      security:
+      - ApiKeyAuth: []
+      summary: merge tag
+      tags:
+      - Tag
   /answer/api/v1/tag/recover:
     post:
       consumes:
@@ -6784,7 +6808,6 @@ paths:
           schema:
             type: string
       security:
-      - ApiKeyAuth: []
       - ApiKeyAuth: []
       summary: UserVerifyEmailSend
       tags:

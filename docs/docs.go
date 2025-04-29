@@ -3109,7 +3109,7 @@ const docTemplate = `{
         },
         "/answer/api/v1/embed/config": {
             "get": {
-                "description": "GetEmbedConfig",
+                "description": "get embed plugin config",
                 "consumes": [
                     "application/json"
                 ],
@@ -3117,9 +3117,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "PluginEmbed"
+                    "Plugin"
                 ],
-                "summary": "GetEmbedConfig",
+                "summary": "get embed plugin config",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -5035,9 +5035,6 @@ const docTemplate = `{
                 "security": [
                     {
                         "ApiKeyAuth": []
-                    },
-                    {
-                        "ApiKeyAuth": []
                     }
                 ],
                 "description": "add report \u003cbr\u003e source (question, answer, comment, user)",
@@ -5075,9 +5072,6 @@ const docTemplate = `{
         "/answer/api/v1/report/review": {
             "put": {
                 "security": [
-                    {
-                        "ApiKeyAuth": []
-                    },
                     {
                         "ApiKeyAuth": []
                     }
@@ -5180,9 +5174,6 @@ const docTemplate = `{
         "/answer/api/v1/review/pending/post": {
             "put": {
                 "security": [
-                    {
-                        "ApiKeyAuth": []
-                    },
                     {
                         "ApiKeyAuth": []
                     }
@@ -5837,6 +5828,45 @@ const docTemplate = `{
                 }
             }
         },
+        "/answer/api/v1/tag/merge": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "merge tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "merge tag",
+                "parameters": [
+                    {
+                        "description": "tag",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.AddTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
         "/answer/api/v1/tag/recover": {
             "post": {
                 "security": [
@@ -6295,9 +6325,6 @@ const docTemplate = `{
         "/answer/api/v1/user/email/verification/send": {
             "post": {
                 "security": [
-                    {
-                        "ApiKeyAuth": []
-                    },
                     {
                         "ApiKeyAuth": []
                     }
@@ -9097,6 +9124,9 @@ const docTemplate = `{
                 },
                 "slug_name": {
                     "type": "string"
+                },
+                "tag_id": {
+                    "type": "string"
                 }
             }
         },
@@ -11062,7 +11092,8 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "maxLength": 30
+                    "maxLength": 30,
+                    "minLength": 2
                 },
                 "website": {
                     "type": "string",

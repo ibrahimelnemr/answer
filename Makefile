@@ -1,6 +1,6 @@
 .PHONY: build clean ui
 
-VERSION=1.4.5
+VERSION=1.5.0
 BIN=answer
 DIR_SRC=./cmd/answer
 DOCKER_CMD=docker
@@ -23,10 +23,10 @@ universal: generate
 generate:
 	@$(GO) get github.com/swaggo/swag/cmd/swag@v1.16.3
 	@$(GO) get github.com/google/wire/cmd/wire@v0.5.0
-	@$(GO) get go.uber.org/mock/mockgen@latest
+	@$(GO) get go.uber.org/mock/mockgen@v0.5.0
 	@$(GO) install github.com/swaggo/swag/cmd/swag@v1.16.3
 	@$(GO) install github.com/google/wire/cmd/wire@v0.5.0
-	@$(GO) install go.uber.org/mock/mockgen@latest
+	@$(GO) install go.uber.org/mock/mockgen@v0.5.0
 	@$(GO) generate ./...
 	@$(GO) mod tidy
 
