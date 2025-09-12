@@ -29,7 +29,7 @@ import debounce from 'lodash/debounce';
 import fm from 'front-matter';
 
 import { usePageTags, usePromptWithUnload } from '@/hooks';
-import { Editor, EditorRef, TagSelector } from '@/components';
+import { Editor, EditorRef, TagSelector, HierarchicalTagSelector } from '@/components';
 import type * as Type from '@/common/interface';
 import { DRAFT_QUESTION_STORAGE_KEY } from '@/common/constants';
 import {
@@ -97,6 +97,7 @@ const Ask = () => {
   const [blockState, setBlockState] = useState(false);
   const [focusType, setForceType] = useState('');
   const [hasDraft, setHasDraft] = useState(false);
+  const [showHierarchicalTagSelector, setShowHierarchicalTagSelector] = useState(false);
   const resetForm = () => {
     setFormData(initFormData);
     setCheckState(false);
@@ -119,6 +120,21 @@ const Ask = () => {
       // eslint-disable-next-line
       handleTagsChange(resp);
     });
+  };
+
+  const handleHierarchicalTagSelect = (selectedTag: Type.HierarchicalTagItem, path: string) => {
+    // Create a tag object compatible with the existing tag system
+    const newTag: Type.Tag = {
+      slug_name: selectedTag.slug_name,
+      display_name: selectedTag.display_name,
+      original_text: selectedTag.description || '',
+      parsed_text: selectedTag.description || '',
+    };
+
+    // Add the hierarchical tag to the existing tags
+    const updatedTags = [...formData.tags.value, newTag];
+    handleTagsChange(updatedTags);
+    setShowHierarchicalTagSelector(false);
   };
 
   const isEdit = qid !== undefined;
@@ -502,6 +518,15 @@ const Ask = () => {
                 isInvalid={formData.tags.isInvalid}
                 errMsg={formData.tags.errorMsg}
               />
+              <div className="mt-2">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setShowHierarchicalTagSelector(true)}
+                >
+                  {t('select_hierarchical_tag', { defaultValue: 'Select Tag' })}
+                </Button>
+              </div>
             </Form.Group>
 
             {!isEdit && (
@@ -605,6 +630,12 @@ const Ask = () => {
           </Card>
         </Col>
       </Row>
+
+      <HierarchicalTagSelector
+        visible={showHierarchicalTagSelector}
+        onClose={() => setShowHierarchicalTagSelector(false)}
+        onConfirm={handleHierarchicalTagSelect}
+      />
     </div>
   );
 };

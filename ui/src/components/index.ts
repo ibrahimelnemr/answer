@@ -25,6 +25,7 @@ import Icon from './Icon';
 import SvgIcon from './Icon/svg';
 import Modal from './Modal';
 import TagSelector from './TagSelector';
+import HierarchicalTagSelector from './HierarchicalTagSelector';
 import Unactivate from './Unactivate';
 import UploadImg from './UploadImg';
 import Actions from './Actions';
@@ -77,6 +78,7 @@ export {
   Editor,
   Tag,
   TagSelector,
+  HierarchicalTagSelector,
   Actions,
   Operate,
   UserCard,

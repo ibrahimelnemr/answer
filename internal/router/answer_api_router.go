@@ -27,36 +27,37 @@ import (
 )
 
 type AnswerAPIRouter struct {
-	langController          *controller.LangController
-	userController          *controller.UserController
-	commentController       *controller.CommentController
-	reportController        *controller.ReportController
-	voteController          *controller.VoteController
-	tagController           *controller.TagController
-	followController        *controller.FollowController
-	collectionController    *controller.CollectionController
-	questionController      *controller.QuestionController
-	answerController        *controller.AnswerController
-	searchController        *controller.SearchController
-	revisionController      *controller.RevisionController
-	rankController          *controller.RankController
-	adminUserController     *controller_admin.UserAdminController
-	reasonController        *controller.ReasonController
-	themeController         *controller_admin.ThemeController
-	adminSiteInfoController *controller_admin.SiteInfoController
-	siteInfoController      *controller.SiteInfoController
-	notificationController  *controller.NotificationController
-	dashboardController     *controller.DashboardController
-	uploadController        *controller.UploadController
-	activityController      *controller.ActivityController
-	roleController          *controller_admin.RoleController
-	pluginController        *controller_admin.PluginController
-	permissionController    *controller.PermissionController
-	userPluginController    *controller.UserPluginController
-	reviewController        *controller.ReviewController
-	metaController          *controller.MetaController
-	badgeController         *controller.BadgeController
-	adminBadgeController    *controller_admin.BadgeController
+	langController            *controller.LangController
+	userController            *controller.UserController
+	commentController         *controller.CommentController
+	reportController          *controller.ReportController
+	voteController            *controller.VoteController
+	tagController             *controller.TagController
+	hierarchicalTagController *controller.HierarchicalTagController
+	followController          *controller.FollowController
+	collectionController      *controller.CollectionController
+	questionController        *controller.QuestionController
+	answerController          *controller.AnswerController
+	searchController          *controller.SearchController
+	revisionController        *controller.RevisionController
+	rankController            *controller.RankController
+	adminUserController       *controller_admin.UserAdminController
+	reasonController          *controller.ReasonController
+	themeController           *controller_admin.ThemeController
+	adminSiteInfoController   *controller_admin.SiteInfoController
+	siteInfoController        *controller.SiteInfoController
+	notificationController    *controller.NotificationController
+	dashboardController       *controller.DashboardController
+	uploadController          *controller.UploadController
+	activityController        *controller.ActivityController
+	roleController            *controller_admin.RoleController
+	pluginController          *controller_admin.PluginController
+	permissionController      *controller.PermissionController
+	userPluginController      *controller.UserPluginController
+	reviewController          *controller.ReviewController
+	metaController            *controller.MetaController
+	badgeController           *controller.BadgeController
+	adminBadgeController      *controller_admin.BadgeController
 }
 
 func NewAnswerAPIRouter(
@@ -66,6 +67,7 @@ func NewAnswerAPIRouter(
 	reportController *controller.ReportController,
 	voteController *controller.VoteController,
 	tagController *controller.TagController,
+	hierarchicalTagController *controller.HierarchicalTagController,
 	followController *controller.FollowController,
 	collectionController *controller.CollectionController,
 	questionController *controller.QuestionController,
@@ -92,36 +94,37 @@ func NewAnswerAPIRouter(
 	adminBadgeController *controller_admin.BadgeController,
 ) *AnswerAPIRouter {
 	return &AnswerAPIRouter{
-		langController:          langController,
-		userController:          userController,
-		commentController:       commentController,
-		reportController:        reportController,
-		voteController:          voteController,
-		tagController:           tagController,
-		followController:        followController,
-		collectionController:    collectionController,
-		questionController:      questionController,
-		answerController:        answerController,
-		searchController:        searchController,
-		revisionController:      revisionController,
-		rankController:          rankController,
-		adminUserController:     adminUserController,
-		reasonController:        reasonController,
-		themeController:         themeController,
-		adminSiteInfoController: adminSiteInfoController,
-		notificationController:  notificationController,
-		siteInfoController:      siteInfoController,
-		dashboardController:     dashboardController,
-		uploadController:        uploadController,
-		activityController:      activityController,
-		roleController:          roleController,
-		pluginController:        pluginController,
-		permissionController:    permissionController,
-		userPluginController:    userPluginController,
-		reviewController:        reviewController,
-		metaController:          metaController,
-		badgeController:         badgeController,
-		adminBadgeController:    adminBadgeController,
+		langController:            langController,
+		userController:            userController,
+		commentController:         commentController,
+		reportController:          reportController,
+		voteController:            voteController,
+		tagController:             tagController,
+		hierarchicalTagController: hierarchicalTagController,
+		followController:          followController,
+		collectionController:      collectionController,
+		questionController:        questionController,
+		answerController:          answerController,
+		searchController:          searchController,
+		revisionController:        revisionController,
+		rankController:            rankController,
+		adminUserController:       adminUserController,
+		reasonController:          reasonController,
+		themeController:           themeController,
+		adminSiteInfoController:   adminSiteInfoController,
+		notificationController:    notificationController,
+		siteInfoController:        siteInfoController,
+		dashboardController:       dashboardController,
+		uploadController:          uploadController,
+		activityController:        activityController,
+		roleController:            roleController,
+		pluginController:          pluginController,
+		permissionController:      permissionController,
+		userPluginController:      userPluginController,
+		reviewController:          reviewController,
+		metaController:            metaController,
+		badgeController:           badgeController,
+		adminBadgeController:      adminBadgeController,
 	}
 }
 
@@ -186,6 +189,10 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	r.GET("/tags", a.tagController.GetTagsBySlugName)
 	r.GET("/tag/synonyms", a.tagController.GetTagSynonyms)
 
+	// hierarchical tags
+	r.GET("/hierarchical-tags", a.hierarchicalTagController.GetHierarchicalTags)
+	r.GET("/hierarchical-tags/path", a.hierarchicalTagController.GetHierarchicalTagPath)
+
 	// search
 	r.GET("/search", a.searchController.Search)
 	r.GET("/search/desc", a.searchController.SearchDesc)
@@ -247,6 +254,10 @@ func (a *AnswerAPIRouter) RegisterAnswerAPIRouter(r *gin.RouterGroup) {
 	r.DELETE("/tag", a.tagController.RemoveTag)
 	r.PUT("/tag/synonym", a.tagController.UpdateTagSynonym)
 	r.POST("/tag/merge", a.tagController.MergeTag)
+
+	// hierarchical tags (authenticated routes)
+	r.POST("/hierarchical-tags", a.hierarchicalTagController.CreateHierarchicalTag)
+	r.PUT("/hierarchical-tags", a.hierarchicalTagController.UpdateHierarchicalTag)
 
 	// collection
 	r.POST("/collection/switch", a.collectionController.CollectionSwitch)

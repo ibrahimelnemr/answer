@@ -26,7 +26,8 @@ import classNames from 'classnames';
 import { putFlagReviewAction } from '@/services';
 import { usePageUsers } from '@/hooks';
 import { useCaptchaPlugin } from '@/utils/pluginKit';
-import { Editor, TagSelector, Mentions, TextArea } from '@/components';
+import type * as Type from '@/common/interface';
+import { Editor, TagSelector, HierarchicalTagSelector, Mentions, TextArea } from '@/components';
 import {
   // matchedUsers,
   parseUserInfo,
@@ -89,6 +90,7 @@ const Index: FC<Props> = ({
   const [formData, setFormData] = useState<FormDataItem>(initFormData);
   const [focusEditor, setFocusEditor] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [showHierarchicalTagSelector, setShowHierarchicalTagSelector] = useState(false);
   const pageUsers = usePageUsers();
 
   const editCaptcha = useCaptchaPlugin('edit');
@@ -110,6 +112,23 @@ const Index: FC<Props> = ({
       ...formData,
       ...data,
     });
+  };
+
+  const handleHierarchicalTagSelect = (selectedTag: Type.HierarchicalTagItem, path: string) => {
+    // Create a tag object compatible with the existing tag system
+    const newTag: Type.Tag = {
+      slug_name: selectedTag.slug_name,
+      display_name: selectedTag.display_name,
+      original_text: selectedTag.description || '',
+      parsed_text: selectedTag.description || '',
+    };
+
+    // Add the hierarchical tag to the existing tags
+    const updatedTags = [...formData.tags.value, newTag];
+    handleInput({
+      tags: { value: updatedTags, errorMsg: '', isInvalid: false },
+    });
+    setShowHierarchicalTagSelector(false);
   };
 
   const checkValidated = (): boolean => {
@@ -358,6 +377,15 @@ const Index: FC<Props> = ({
                 isInvalid={formData.tags.isInvalid}
                 errMsg={formData.tags.errorMsg}
               />
+              <div className="mt-2">
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  onClick={() => setShowHierarchicalTagSelector(true)}
+                >
+                  {t('select_hierarchical_tag', { defaultValue: 'Select Tag' })}
+                </Button>
+              </div>
             </Form.Group>
           )}
 
@@ -402,6 +430,12 @@ const Index: FC<Props> = ({
           </Button>
         </Modal.Footer>
       </Form>
+
+      <HierarchicalTagSelector
+        visible={showHierarchicalTagSelector}
+        onClose={() => setShowHierarchicalTagSelector(false)}
+        onConfirm={handleHierarchicalTagSelect}
+      />
     </Modal>
   );
 };

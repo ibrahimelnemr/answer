@@ -40,7 +40,7 @@ import (
 	"github.com/apache/answer/internal/service/follow"
 	"github.com/apache/answer/internal/service/importer"
 	"github.com/apache/answer/internal/service/meta"
-	"github.com/apache/answer/internal/service/meta_common"
+	metacommon "github.com/apache/answer/internal/service/meta_common"
 	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/notification"
 	notficationcommon "github.com/apache/answer/internal/service/notification_common"
@@ -128,4 +128,5 @@ var ProviderSetService = wire.NewSet(
 	badge.NewBadgeGroupService,
 	importer.NewImporterService,
 	file_record.NewFileRecordService,
+	NewHierarchicalTagService,
 )

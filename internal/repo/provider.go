@@ -34,6 +34,7 @@ import (
 	"github.com/apache/answer/internal/repo/config"
 	"github.com/apache/answer/internal/repo/export"
 	"github.com/apache/answer/internal/repo/file_record"
+	"github.com/apache/answer/internal/repo/hierarchical_tag"
 	"github.com/apache/answer/internal/repo/limit"
 	"github.com/apache/answer/internal/repo/meta"
 	"github.com/apache/answer/internal/repo/notification"
@@ -109,4 +110,5 @@ var ProviderSetRepo = wire.NewSet(
 	badge_group.NewBadgeGroupRepo,
 	badge_award.NewBadgeAwardRepo,
 	file_record.NewFileRecordRepo,
+	hierarchical_tag.NewHierarchicalTagRepo,
 )

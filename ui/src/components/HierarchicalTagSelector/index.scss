@@ -17,18 +17,35 @@
  * under the License.
  */
 
-export * from './activity';
-export * from './personal';
-export * from './notification';
-export * from './question';
-export * from './search';
-export * from './tag';
-export * from './hierarchical_tag';
-export * from './settings';
-export * from './legal';
-export * from './timeline';
-export * from './revision';
-export * from './user';
-export * from './Oauth';
-export * from './review';
-export * from './badges';
+.hierarchical-tag-selector {
+  .selected-path {
+    .path-display {
+      background-color: #f8f9fa;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-family: monospace;
+      color: #495057;
+      border: 1px solid #dee2e6;
+    }
+  }
+
+  .tag-levels {
+    .tag-level {
+      .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .dropdown-item {
+        &:hover {
+          background-color: #f8f9fa;
+        }
+
+        &.active {
+          background-color: #007bff;
+          color: white;
+        }
+      }
+    }
+  }
+}

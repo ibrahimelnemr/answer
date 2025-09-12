@@ -64,6 +64,37 @@ export interface SynonymsTag extends Tag {
   tag?: string;
 }
 
+export interface HierarchicalTagItem {
+  id: string;
+  name: string;
+  slug_name: string;
+  display_name: string;
+  parent_id?: string;
+  level: number;
+  path: string;
+  description?: string;
+  has_children: boolean;
+  children?: HierarchicalTagItem[];
+}
+
+export interface GetHierarchicalTagsReq {
+  parent_id?: string;
+}
+
+export interface GetHierarchicalTagsResp {
+  tags: HierarchicalTagItem[];
+}
+
+export interface HierarchicalTagPathReq {
+  tag_id: string;
+}
+
+export interface HierarchicalTagPathResp {
+  path: string;
+  display_path: string;
+  tags: HierarchicalTagItem[];
+}
+
 export interface TagInfo extends TagBase {
   tag_id: string;
   original_text: string;
