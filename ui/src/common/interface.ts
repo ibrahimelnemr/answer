@@ -114,6 +114,7 @@ export interface QuestionParams extends ImgCodeReq {
   url_title?: string;
   content: string;
   tags: Tag[];
+  hierarchical_tag?: string;
 }
 
 export interface QuestionWithAnswer extends QuestionParams {
@@ -769,6 +770,7 @@ export interface PutFlagReviewParams {
   title?: string;
   content?: string;
   tags?: Tag[];
+  hierarchical_tag?: string;
   // mention_username_list?: any;
   captcha_code?: any;
   captcha_id?: any;

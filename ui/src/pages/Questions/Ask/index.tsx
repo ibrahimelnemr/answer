@@ -29,7 +29,7 @@ import debounce from 'lodash/debounce';
 import fm from 'front-matter';
 
 import { usePageTags, usePromptWithUnload } from '@/hooks';
-import { Editor, EditorRef, TagSelector, HierarchicalTagSelector } from '@/components';
+import { Editor, EditorRef, TagSelector, HierarchicalTagSelector, HierarchicalTagDropdown } from '@/components';
 import type * as Type from '@/common/interface';
 import { DRAFT_QUESTION_STORAGE_KEY } from '@/common/constants';
 import {
@@ -55,6 +55,7 @@ import SearchQuestion from './components/SearchQuestion';
 interface FormDataItem {
   title: Type.FormValue<string>;
   tags: Type.FormValue<Type.Tag[]>;
+  hierarchical_tag: Type.FormValue<string>;
   content: Type.FormValue<string>;
   answer_content: Type.FormValue<string>;
   edit_summary: Type.FormValue<string>;
@@ -71,6 +72,11 @@ const Ask = () => {
     },
     tags: {
       value: [],
+      isInvalid: false,
+      errorMsg: '',
+    },
+    hierarchical_tag: {
+      value: '',
       isInvalid: false,
       errorMsg: '',
     },
@@ -135,6 +141,17 @@ const Ask = () => {
     const updatedTags = [...formData.tags.value, newTag];
     handleTagsChange(updatedTags);
     setShowHierarchicalTagSelector(false);
+  };
+
+  const handleHierarchicalTagChange = (tagPath: string, selectedTag: Type.HierarchicalTagItem | null) => {
+    setFormData({
+      ...formData,
+      hierarchical_tag: {
+        value: tagPath,
+        isInvalid: false,
+        errorMsg: '',
+      },
+    });
   };
 
   const isEdit = qid !== undefined;
@@ -402,6 +419,7 @@ const Ask = () => {
       title: formData.title.value,
       content: formData.content.value,
       tags: formData.tags.value,
+      hierarchical_tag: formData.hierarchical_tag.value,
     };
 
     if (isEdit) {
@@ -506,6 +524,20 @@ const Ask = () => {
               <Form.Control.Feedback type="invalid">
                 {formData.content.errorMsg}
               </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group controlId="hierarchical_tag" className="my-3">
+              <Form.Label>
+                {t('form.fields.hierarchical_tag.label', { defaultValue: 'Category (Required)' })}
+                <span className="text-danger">*</span>
+              </Form.Label>
+              <HierarchicalTagDropdown
+                value={formData.hierarchical_tag.value}
+                onChange={handleHierarchicalTagChange}
+                isInvalid={formData.hierarchical_tag.isInvalid}
+                errMsg={formData.hierarchical_tag.errorMsg}
+                required
+              />
             </Form.Group>
 
             <Form.Group controlId="tags" className="my-3">

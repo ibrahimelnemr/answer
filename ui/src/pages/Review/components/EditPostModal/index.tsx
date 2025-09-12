@@ -27,7 +27,7 @@ import { putFlagReviewAction } from '@/services';
 import { usePageUsers } from '@/hooks';
 import { useCaptchaPlugin } from '@/utils/pluginKit';
 import type * as Type from '@/common/interface';
-import { Editor, TagSelector, HierarchicalTagSelector, Mentions, TextArea } from '@/components';
+import { Editor, TagSelector, HierarchicalTagSelector, HierarchicalTagDropdown, Mentions, TextArea } from '@/components';
 import {
   // matchedUsers,
   parseUserInfo,
@@ -48,6 +48,7 @@ interface Props {
     title: string;
     content: string;
     tags: Type.Tag[];
+    hierarchical_tag?: string;
   };
   objectType: Type.FlagReviewItem['object_type'] | '';
   visible: boolean;
@@ -58,6 +59,7 @@ interface Props {
 interface FormDataItem {
   title: Type.FormValue<string>;
   tags: Type.FormValue<Type.Tag[]>;
+  hierarchical_tag: Type.FormValue<string>;
   content: Type.FormValue<string>;
 }
 
@@ -69,6 +71,11 @@ const initFormData = {
   },
   tags: {
     value: [],
+    isInvalid: false,
+    errorMsg: '',
+  },
+  hierarchical_tag: {
+    value: '',
     isInvalid: false,
     errorMsg: '',
   },
@@ -129,6 +136,12 @@ const Index: FC<Props> = ({
       tags: { value: updatedTags, errorMsg: '', isInvalid: false },
     });
     setShowHierarchicalTagSelector(false);
+  };
+
+  const handleHierarchicalTagChange = (tagPath: string, selectedTag: Type.HierarchicalTagItem | null) => {
+    handleInput({
+      hierarchical_tag: { value: tagPath, errorMsg: '', isInvalid: false },
+    });
   };
 
   const checkValidated = (): boolean => {
@@ -195,6 +208,7 @@ const Index: FC<Props> = ({
       title: formData.title.value,
       content: formData.content.value,
       tags: formData.tags.value,
+      hierarchical_tag: formData.hierarchical_tag.value,
       operation_type: 'edit_post',
       flag_id: originalData.flag_id,
     };
@@ -275,6 +289,7 @@ const Index: FC<Props> = ({
 
     formData.title.value = originalData.title;
     formData.content.value = originalData.content;
+    formData.hierarchical_tag.value = originalData.hierarchical_tag || '';
     formData.tags.value = originalData.tags.map((item) => {
       return {
         ...item,
@@ -363,30 +378,46 @@ const Index: FC<Props> = ({
           )}
 
           {objectType === 'question' && (
-            <Form.Group controlId="tags" className="my-3">
-              <Form.Label>{t('form.fields.tags.label')}</Form.Label>
-              <TagSelector
-                value={formData.tags.value}
-                onChange={(value) => {
-                  handleInput({
-                    tags: { value, errorMsg: '', isInvalid: false },
-                  });
-                }}
-                showRequiredTag
-                maxTagLength={5}
-                isInvalid={formData.tags.isInvalid}
-                errMsg={formData.tags.errorMsg}
-              />
-              <div className="mt-2">
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => setShowHierarchicalTagSelector(true)}
-                >
-                  {t('select_hierarchical_tag', { defaultValue: 'Select Tag' })}
-                </Button>
-              </div>
-            </Form.Group>
+            <>
+              <Form.Group controlId="hierarchical_tag" className="my-3">
+                <Form.Label>
+                  {t('form.fields.hierarchical_tag.label', { defaultValue: 'Category (Required)' })}
+                  <span className="text-danger">*</span>
+                </Form.Label>
+                <HierarchicalTagDropdown
+                  value={formData.hierarchical_tag.value}
+                  onChange={handleHierarchicalTagChange}
+                  isInvalid={formData.hierarchical_tag.isInvalid}
+                  errMsg={formData.hierarchical_tag.errorMsg}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group controlId="tags" className="my-3">
+                <Form.Label>{t('form.fields.tags.label')}</Form.Label>
+                <TagSelector
+                  value={formData.tags.value}
+                  onChange={(value) => {
+                    handleInput({
+                      tags: { value, errorMsg: '', isInvalid: false },
+                    });
+                  }}
+                  showRequiredTag
+                  maxTagLength={5}
+                  isInvalid={formData.tags.isInvalid}
+                  errMsg={formData.tags.errorMsg}
+                />
+                <div className="mt-2">
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => setShowHierarchicalTagSelector(true)}
+                  >
+                    {t('select_hierarchical_tag', { defaultValue: 'Select Tag' })}
+                  </Button>
+                </div>
+              </Form.Group>
+            </>
           )}
 
           {objectType === 'comment' && (
