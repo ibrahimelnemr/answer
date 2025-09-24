@@ -20,8 +20,8 @@ server:
     addr: 0.0.0.0:80
 data:
   database:
-    driver: "sqlite3"
-    connection: "/data/sqlite3/answer.db"
+    driver: "postgres"
+    connection: "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable"
   cache:
     file_path: "/data/cache/cache.db"
 i18n:
