@@ -192,6 +192,7 @@ func (a *AnswerAPIRouter) RegisterUnAuthAnswerAPIRouter(r *gin.RouterGroup) {
 	// hierarchical tags
 	r.GET("/hierarchical-tags", a.hierarchicalTagController.GetHierarchicalTags)
 	r.GET("/hierarchical-tags/path", a.hierarchicalTagController.GetHierarchicalTagPath)
+	r.GET("/hierarchical-tags/test", a.hierarchicalTagController.TestHierarchicalTag)
 
 	// search
 	r.GET("/search", a.searchController.Search)

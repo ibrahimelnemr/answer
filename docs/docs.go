@@ -3286,6 +3286,190 @@ const docTemplate = `{
                 }
             }
         },
+        "/answer/api/v1/hierarchical-tags": {
+            "get": {
+                "description": "Get hierarchical tags by parent ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HierarchicalTag"
+                ],
+                "summary": "Get hierarchical tags",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "parent tag ID",
+                        "name": "parent_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.GetHierarchicalTagsResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing hierarchical tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HierarchicalTag"
+                ],
+                "summary": "Update hierarchical tag",
+                "parameters": [
+                    {
+                        "description": "hierarchical tag data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UpdateHierarchicalTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new hierarchical tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HierarchicalTag"
+                ],
+                "summary": "Create hierarchical tag",
+                "parameters": [
+                    {
+                        "description": "hierarchical tag data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.CreateHierarchicalTagReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.RespBody"
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/hierarchical-tags/path": {
+            "get": {
+                "description": "Get the full path of a hierarchical tag",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HierarchicalTag"
+                ],
+                "summary": "Get hierarchical tag path",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "tag ID",
+                        "name": "tag_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.HierarchicalTagPathResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/hierarchical-tags/test": {
+            "get": {
+                "description": "Simple test endpoint to verify hierarchical tag system is working",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "HierarchicalTag"
+                ],
+                "summary": "Test hierarchical tag endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/answer/api/v1/language/config": {
             "get": {
                 "description": "get language config mapping",
@@ -8282,6 +8466,34 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.CreateHierarchicalTagReq": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "name",
+                "slug_name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "slug_name": {
+                    "type": "string",
+                    "maxLength": 100
+                }
+            }
+        },
         "schema.DeletePermanentlyReq": {
             "type": "object",
             "required": [
@@ -8778,6 +8990,17 @@ const docTemplate = `{
                 "tag_id": {
                     "description": "tag id",
                     "type": "string"
+                }
+            }
+        },
+        "schema.GetHierarchicalTagsResp": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.HierarchicalTagItem"
+                    }
                 }
             }
         },
@@ -9595,6 +9818,61 @@ const docTemplate = `{
                 "vote_type": {
                     "description": "vote type",
                     "type": "string"
+                }
+            }
+        },
+        "schema.HierarchicalTagItem": {
+            "type": "object",
+            "properties": {
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.HierarchicalTagItem"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "has_children": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parent_id": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "slug_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "schema.HierarchicalTagPathResp": {
+            "type": "object",
+            "properties": {
+                "display_path": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.HierarchicalTagItem"
+                    }
                 }
             }
         },
@@ -11307,6 +11585,35 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "schema.UpdateHierarchicalTagReq": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "id",
+                "name",
+                "slug_name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 100
+                },
+                "slug_name": {
+                    "type": "string",
+                    "maxLength": 100
                 }
             }
         },

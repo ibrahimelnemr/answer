@@ -29,6 +29,7 @@ import (
 	"github.com/apache/answer/internal/repo/config"
 	"github.com/apache/answer/internal/repo/export"
 	"github.com/apache/answer/internal/repo/file_record"
+	"github.com/apache/answer/internal/repo/hierarchical_tag"
 	"github.com/apache/answer/internal/repo/limit"
 	"github.com/apache/answer/internal/repo/meta"
 	notification2 "github.com/apache/answer/internal/repo/notification"
@@ -49,6 +50,7 @@ import (
 	"github.com/apache/answer/internal/repo/user_external_login"
 	"github.com/apache/answer/internal/repo/user_notification_config"
 	"github.com/apache/answer/internal/router"
+	"github.com/apache/answer/internal/service"
 	"github.com/apache/answer/internal/service/action"
 	activity2 "github.com/apache/answer/internal/service/activity"
 	activity_common2 "github.com/apache/answer/internal/service/activity_common"
@@ -195,6 +197,9 @@ func initApplication(debug bool, serverConf *conf.Server, dbConf *data.Database,
 	voteService := content.NewVoteService(contentVoteRepo, configService, questionRepo, answerRepo, commentCommonRepo, objService, eventQueueService)
 	voteController := controller.NewVoteController(voteService, rankService, captchaService)
 	tagController := controller.NewTagController(tagService, tagCommonService, rankService)
+	hierarchicalTagRepo := hierarchical_tag.NewHierarchicalTagRepo(dataData)
+	hierarchicalTagService := service.NewHierarchicalTagService(hierarchicalTagRepo)
+	hierarchicalTagController := controller.NewHierarchicalTagController(hierarchicalTagService)
 	followFollowRepo := activity.NewFollowRepo(dataData, uniqueIDRepo, activityRepo)
 	followService := follow.NewFollowService(followFollowRepo, followRepo, tagCommonRepo)
 	followController := controller.NewFollowController(followService)
@@ -254,7 +259,7 @@ func initApplication(debug bool, serverConf *conf.Server, dbConf *data.Database,
 	badgeService := badge2.NewBadgeService(badgeRepo, badgeGroupRepo, badgeAwardRepo, badgeEventService, siteInfoCommonService)
 	badgeController := controller.NewBadgeController(badgeService, badgeAwardService)
 	controller_adminBadgeController := controller_admin.NewBadgeController(badgeService)
-	answerAPIRouter := router.NewAnswerAPIRouter(langController, userController, commentController, reportController, voteController, tagController, followController, collectionController, questionController, answerController, searchController, revisionController, rankController, userAdminController, reasonController, themeController, siteInfoController, controllerSiteInfoController, notificationController, dashboardController, uploadController, activityController, roleController, pluginController, permissionController, userPluginController, reviewController, metaController, badgeController, controller_adminBadgeController)
+	answerAPIRouter := router.NewAnswerAPIRouter(langController, userController, commentController, reportController, voteController, tagController, hierarchicalTagController, followController, collectionController, questionController, answerController, searchController, revisionController, rankController, userAdminController, reasonController, themeController, siteInfoController, controllerSiteInfoController, notificationController, dashboardController, uploadController, activityController, roleController, pluginController, permissionController, userPluginController, reviewController, metaController, badgeController, controller_adminBadgeController)
 	swaggerRouter := router.NewSwaggerRouter(swaggerConf)
 	uiRouter := router.NewUIRouter(controllerSiteInfoController, siteInfoCommonService)
 	authUserMiddleware := middleware.NewAuthUserMiddleware(authService, siteInfoCommonService)

@@ -531,6 +531,26 @@ definitions:
       name:
         type: string
     type: object
+  schema.CreateHierarchicalTagReq:
+    properties:
+      description:
+        type: string
+      display_name:
+        maxLength: 100
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      parent_id:
+        type: string
+      slug_name:
+        maxLength: 100
+        type: string
+    required:
+    - display_name
+    - name
+    - slug_name
+    type: object
   schema.DeletePermanentlyReq:
     properties:
       type:
@@ -888,6 +908,13 @@ definitions:
       tag_id:
         description: tag id
         type: string
+    type: object
+  schema.GetHierarchicalTagsResp:
+    properties:
+      tags:
+        items:
+          $ref: '#/definitions/schema.HierarchicalTagItem'
+        type: array
     type: object
   schema.GetObjectTimelineResp:
     properties:
@@ -1453,6 +1480,42 @@ definitions:
       vote_type:
         description: vote type
         type: string
+    type: object
+  schema.HierarchicalTagItem:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/schema.HierarchicalTagItem'
+        type: array
+      description:
+        type: string
+      display_name:
+        type: string
+      has_children:
+        type: boolean
+      id:
+        type: string
+      level:
+        type: integer
+      name:
+        type: string
+      parent_id:
+        type: string
+      path:
+        type: string
+      slug_name:
+        type: string
+    type: object
+  schema.HierarchicalTagPathResp:
+    properties:
+      display_path:
+        type: string
+      path:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/schema.HierarchicalTagItem'
+        type: array
     type: object
   schema.LoadingAction:
     properties:
@@ -2626,6 +2689,27 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  schema.UpdateHierarchicalTagReq:
+    properties:
+      description:
+        type: string
+      display_name:
+        maxLength: 100
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 100
+        type: string
+      slug_name:
+        maxLength: 100
+        type: string
+    required:
+    - display_name
+    - id
+    - name
+    - slug_name
     type: object
   schema.UpdateInfoRequest:
     properties:
@@ -5117,6 +5201,118 @@ paths:
       summary: update user follow tags
       tags:
       - Activity
+  /answer/api/v1/hierarchical-tags:
+    get:
+      consumes:
+      - application/json
+      description: Get hierarchical tags by parent ID
+      parameters:
+      - description: parent tag ID
+        in: query
+        name: parent_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.GetHierarchicalTagsResp'
+              type: object
+      summary: Get hierarchical tags
+      tags:
+      - HierarchicalTag
+    post:
+      consumes:
+      - application/json
+      description: Create a new hierarchical tag
+      parameters:
+      - description: hierarchical tag data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/schema.CreateHierarchicalTagReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RespBody'
+      summary: Create hierarchical tag
+      tags:
+      - HierarchicalTag
+    put:
+      consumes:
+      - application/json
+      description: Update an existing hierarchical tag
+      parameters:
+      - description: hierarchical tag data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/schema.UpdateHierarchicalTagReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.RespBody'
+      summary: Update hierarchical tag
+      tags:
+      - HierarchicalTag
+  /answer/api/v1/hierarchical-tags/path:
+    get:
+      consumes:
+      - application/json
+      description: Get the full path of a hierarchical tag
+      parameters:
+      - description: tag ID
+        in: query
+        name: tag_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.HierarchicalTagPathResp'
+              type: object
+      summary: Get hierarchical tag path
+      tags:
+      - HierarchicalTag
+  /answer/api/v1/hierarchical-tags/test:
+    get:
+      description: Simple test endpoint to verify hierarchical tag system is working
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  additionalProperties: true
+                  type: object
+              type: object
+      summary: Test hierarchical tag endpoint
+      tags:
+      - HierarchicalTag
   /answer/api/v1/language/config:
     get:
       description: get language config mapping

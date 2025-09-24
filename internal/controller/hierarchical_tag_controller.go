@@ -123,3 +123,25 @@ func (htc *HierarchicalTagController) GetHierarchicalTagPath(ctx *gin.Context) {
 
 	handler.HandleResponse(ctx, nil, resp)
 }
+
+// TestHierarchicalTag godoc
+// @Summary Test hierarchical tag endpoint
+// @Description Simple test endpoint to verify hierarchical tag system is working
+// @Tags HierarchicalTag
+// @Produce json
+// @Success 200 {object} handler.RespBody{data=map[string]interface{}}
+// @Router /answer/api/v1/hierarchical-tags/test [get]
+func (htc *HierarchicalTagController) TestHierarchicalTag(ctx *gin.Context) {
+	testData := map[string]interface{}{
+		"message":   "Hierarchical tag system is working!",
+		"timestamp": "2024-01-01T00:00:00Z",
+		"sample_hierarchy": []string{
+			"#Customer",
+			"#Customer#Backend",
+			"#Customer#Backend#Java",
+		},
+		"status": "success",
+	}
+
+	handler.HandleResponse(ctx, nil, testData)
+}
