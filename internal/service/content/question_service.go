@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/answer/internal/service/eventqueue"
+	"github.com/apache/answer/internal/service/event_queue"
 	"github.com/apache/answer/plugin"
 
 	"github.com/apache/answer/internal/base/constant"
@@ -38,13 +38,13 @@ import (
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/activity"
 	"github.com/apache/answer/internal/service/activity_common"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	answercommon "github.com/apache/answer/internal/service/answer_common"
 	collectioncommon "github.com/apache/answer/internal/service/collection_common"
 	"github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/export"
 	metacommon "github.com/apache/answer/internal/service/meta_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/notification"
 	"github.com/apache/answer/internal/service/permission"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
@@ -84,14 +84,14 @@ type QuestionService struct {
 	collectionCommon                 *collectioncommon.CollectionCommon
 	answerActivityService            *activity.AnswerActivityService
 	emailService                     *export.EmailService
-	notificationQueueService         noticequeue.Service
-	externalNotificationQueueService noticequeue.ExternalService
-	activityQueueService             activityqueue.Service
+	notificationQueueService         notice_queue.NotificationQueueService
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService
+	activityQueueService             activity_queue.ActivityQueueService
 	siteInfoService                  siteinfo_common.SiteInfoCommonService
 	newQuestionNotificationService   *notification.ExternalNotificationService
 	reviewService                    *review.ReviewService
 	configService                    *config.ConfigService
-	eventQueueService                eventqueue.Service
+	eventQueueService                event_queue.EventQueueService
 	reviewRepo                       review.ReviewRepo
 }
 
@@ -110,14 +110,14 @@ func NewQuestionService(
 	collectionCommon *collectioncommon.CollectionCommon,
 	answerActivityService *activity.AnswerActivityService,
 	emailService *export.EmailService,
-	notificationQueueService noticequeue.Service,
-	externalNotificationQueueService noticequeue.ExternalService,
-	activityQueueService activityqueue.Service,
+	notificationQueueService notice_queue.NotificationQueueService,
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService,
+	activityQueueService activity_queue.ActivityQueueService,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
 	newQuestionNotificationService *notification.ExternalNotificationService,
 	reviewService *review.ReviewService,
 	configService *config.ConfigService,
-	eventQueueService eventqueue.Service,
+	eventQueueService event_queue.EventQueueService,
 	reviewRepo review.ReviewRepo,
 ) *QuestionService {
 	return &QuestionService{
@@ -229,18 +229,9 @@ func (qs *QuestionService) AddQuestionCheckTags(ctx context.Context, tags []*ent
 	return []string{}, nil
 }
 func (qs *QuestionService) CheckAddQuestion(ctx context.Context, req *schema.QuestionAdd) (errorlist any, err error) {
-	minimumTags, err := qs.tagCommon.GetMinimumTags(ctx)
+	tagNames, tagErrList, err := qs.normalizeQuestionTagInput(ctx, req.Tags)
 	if err != nil {
-		return
-	}
-	if len(req.Tags) < minimumTags {
-		errorlist := make([]*validator.FormErrorField, 0)
-		errorlist = append(errorlist, &validator.FormErrorField{
-			ErrorField: "tags",
-			ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagMinCount),
-		})
-		err = errors.BadRequest(reason.TagMinCount)
-		return errorlist, err
+		return tagErrList, err
 	}
 	minimumContentLength, err := qs.questioncommon.GetMinimumContentLength(ctx)
 	if err != nil {
@@ -269,11 +260,7 @@ func (qs *QuestionService) CheckAddQuestion(ctx context.Context, req *schema.Que
 		return errorlist, err
 	}
 
-	tagNameList := make([]string, 0)
-	for _, tag := range req.Tags {
-		tagNameList = append(tagNameList, tag.SlugName)
-	}
-	Tags, tagerr := qs.tagCommon.GetTagListByNames(ctx, tagNameList)
+	Tags, tagerr := qs.tagCommon.GetTagListByNames(ctx, tagNames)
 	if tagerr != nil {
 		return errorlist, tagerr
 	}
@@ -299,20 +286,41 @@ func (qs *QuestionService) HasNewTag(ctx context.Context, tags []*schema.TagItem
 	return qs.tagCommon.HasNewTag(ctx, tags)
 }
 
-// AddQuestion add question
-func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.QuestionAdd) (questionInfo any, err error) {
-	minimumTags, err := qs.tagCommon.GetMinimumTags(ctx)
-	if err != nil {
-		return
-	}
-	if len(req.Tags) < minimumTags {
-		errorlist := make([]*validator.FormErrorField, 0)
+func (qs *QuestionService) normalizeQuestionTagInput(ctx context.Context, tags []*schema.TagItem) ([]string, []*validator.FormErrorField, error) {
+	lang := handler.GetLangByCtx(ctx)
+	if len(tags) != 1 {
+		errorlist := make([]*validator.FormErrorField, 0, 1)
 		errorlist = append(errorlist, &validator.FormErrorField{
 			ErrorField: "tags",
-			ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagMinCount),
+			ErrorMsg:   translator.Tr(lang, reason.QuestionSingleTagRequired),
 		})
-		err = errors.BadRequest(reason.TagMinCount)
-		return errorlist, err
+		return nil, errorlist, errors.BadRequest(reason.QuestionSingleTagRequired)
+	}
+
+	tagNameList := make([]string, 0, len(tags))
+	for _, tag := range tags {
+		normalizedSlug, slugErr := tagcommon.NormalizeAndValidateQuestionTag(tag.SlugName)
+		if slugErr != nil {
+			errorlist := make([]*validator.FormErrorField, 0, 1)
+			errorlist = append(errorlist, &validator.FormErrorField{
+				ErrorField: "tags",
+				ErrorMsg:   translator.Tr(lang, reason.TagInvalidHierarchy),
+			})
+			return nil, errorlist, slugErr
+		}
+		tag.SlugName = normalizedSlug
+		tagNameList = append(tagNameList, normalizedSlug)
+	}
+
+	return tagNameList, nil, nil
+}
+
+// AddQuestion add question
+
+func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.QuestionAdd) (questionInfo any, err error) {
+	tagNameList, tagErrList, err := qs.normalizeQuestionTagInput(ctx, req.Tags)
+	if err != nil {
+		return tagErrList, err
 	}
 	minimumContentLength, err := qs.questioncommon.GetMinimumContentLength(ctx)
 	if err != nil {
@@ -341,11 +349,6 @@ func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.Question
 		return errorlist, err
 	}
 
-	tagNameList := make([]string, 0)
-	for _, tag := range req.Tags {
-		tag.SlugName = strings.ReplaceAll(tag.SlugName, " ", "-")
-		tagNameList = append(tagNameList, tag.SlugName)
-	}
 	tags, tagerr := qs.tagCommon.GetTagListByNames(ctx, tagNameList)
 	if tagerr != nil {
 		return questionInfo, tagerr
@@ -670,11 +673,11 @@ func (qs *QuestionService) UpdateQuestionCheckTags(ctx context.Context, req *sch
 		return nil, nil
 	}
 
-	tagNameList := make([]string, 0)
-	oldtagNameList := make([]string, 0)
-	for _, tag := range req.Tags {
-		tagNameList = append(tagNameList, tag.SlugName)
+	tagNameList, tagErrList, err := qs.normalizeQuestionTagInput(ctx, req.Tags)
+	if err != nil {
+		return tagErrList, err
 	}
+	oldtagNameList := make([]string, 0)
 	for _, tag := range oldTags {
 		oldtagNameList = append(oldtagNameList, tag.SlugName)
 	}
@@ -949,12 +952,11 @@ func (qs *QuestionService) UpdateQuestion(ctx context.Context, req *schema.Quest
 		return questionInfo, tagerr
 	}
 
-	tagNameList := make([]string, 0)
-	oldtagNameList := make([]string, 0)
-	for _, tag := range req.Tags {
-		tag.SlugName = strings.ReplaceAll(tag.SlugName, " ", "-")
-		tagNameList = append(tagNameList, tag.SlugName)
+	tagNameList, tagErrList, err := qs.normalizeQuestionTagInput(ctx, req.Tags)
+	if err != nil {
+		return tagErrList, err
 	}
+	oldtagNameList := make([]string, 0)
 	for _, tag := range oldTags {
 		oldtagNameList = append(oldtagNameList, tag.SlugName)
 	}

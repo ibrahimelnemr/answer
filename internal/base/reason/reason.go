@@ -48,6 +48,7 @@ const (
 	QuestionUnderReview              = "error.question.under_review"
 	QuestionContentCannotEmpty       = "error.question.content_cannot_empty"
 	QuestionContentLessThanMinimum   = "error.question.content_less_than_minimum"
+	QuestionSingleTagRequired        = "error.question.single_tag_required"
 	AnswerNotFound                   = "error.answer.not_found"
 	AnswerCannotDeleted              = "error.answer.cannot_deleted"
 	AnswerCannotUpdate               = "error.answer.cannot_update"
@@ -99,6 +100,7 @@ const (
 	RevisionNoPermission             = "error.revision.no_permission"
 	UserCannotUpdateYourRole         = "error.user.cannot_update_your_role"
 	TagCannotSetSynonymAsItself      = "error.tag.cannot_set_synonym_as_itself"
+	TagInvalidHierarchy              = "error.tag.invalid_hierarchy"
 	NotAllowedRegistration           = "error.user.not_allowed_registration"
 	NotAllowedLoginViaPassword       = "error.user.not_allowed_login_via_password"
 	SMTPConfigFromNameCannotBeEmail  = "error.smtp.config_from_name_cannot_be_email"
@@ -117,7 +119,6 @@ const (
 	UserStatusSuspendedForever       = "error.user.status_suspended_forever"
 	UserStatusSuspendedUntil         = "error.user.status_suspended_until"
 	UserStatusDeleted                = "error.user.status_deleted"
-	ErrFeatureDisabled               = "error.feature.disabled"
 )
 
 // user external login reasons

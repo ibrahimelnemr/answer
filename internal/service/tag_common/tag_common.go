@@ -33,7 +33,7 @@ import (
 	"github.com/apache/answer/internal/base/validator"
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	"github.com/apache/answer/internal/service/revision_common"
 	"github.com/apache/answer/internal/service/siteinfo_common"
 	"github.com/apache/answer/pkg/converter"
@@ -89,7 +89,7 @@ type TagCommonService struct {
 	tagRelRepo           TagRelRepo
 	tagRepo              TagRepo
 	siteInfoService      siteinfo_common.SiteInfoCommonService
-	activityQueueService activityqueue.Service
+	activityQueueService activity_queue.ActivityQueueService
 }
 
 // NewTagCommonService new tag service
@@ -99,7 +99,7 @@ func NewTagCommonService(
 	tagRepo TagRepo,
 	revisionService *revision_common.RevisionService,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
-	activityQueueService activityqueue.Service,
+	activityQueueService activity_queue.ActivityQueueService,
 ) *TagCommonService {
 	return &TagCommonService{
 		tagCommonRepo:        tagCommonRepo,
@@ -270,7 +270,7 @@ func (ts *TagCommonService) GetTagListByNames(ctx context.Context, tagNames []st
 }
 
 func (ts *TagCommonService) ExistRecommend(ctx context.Context, tags []*schema.TagItem) (bool, error) {
-	taginfo, err := ts.siteInfoService.GetSiteTag(ctx)
+	taginfo, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -295,7 +295,7 @@ func (ts *TagCommonService) ExistRecommend(ctx context.Context, tags []*schema.T
 }
 
 func (ts *TagCommonService) GetMinimumTags(ctx context.Context) (int, error) {
-	siteInfo, err := ts.siteInfoService.GetSiteQuestion(ctx)
+	siteInfo, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		return 1, err
 	}
@@ -347,8 +347,10 @@ func (ts *TagCommonService) AddTag(ctx context.Context, req *schema.AddTagReq) (
 	if exist {
 		return nil, errors.BadRequest(reason.TagAlreadyExist)
 	}
-	slugName := strings.ReplaceAll(req.SlugName, " ", "-")
-	slugName = strings.ToLower(slugName)
+	slugName, err := normalizeAndValidateHierarchicalSlug(req.SlugName)
+	if err != nil {
+		return nil, err
+	}
 	tagInfo := &entity.Tag{
 		SlugName:     slugName,
 		DisplayName:  req.DisplayName,
@@ -385,6 +387,13 @@ func (ts *TagCommonService) AddTag(ctx context.Context, req *schema.AddTagReq) (
 
 // AddTagList get object tag
 func (ts *TagCommonService) AddTagList(ctx context.Context, tagList []*entity.Tag) (err error) {
+	for _, tag := range tagList {
+		slugName, err := normalizeAndValidateHierarchicalSlug(tag.SlugName)
+		if err != nil {
+			return err
+		}
+		tag.SlugName = slugName
+	}
 	return ts.tagCommonRepo.AddTagList(ctx, tagList)
 }
 
@@ -469,7 +478,7 @@ func (ts *TagCommonService) TagsFormatRecommendAndReserved(ctx context.Context, 
 	if len(tagList) == 0 {
 		return
 	}
-	tagConfig, err := ts.siteInfoService.GetSiteTag(ctx)
+	tagConfig, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		log.Error(err)
 		return
@@ -485,7 +494,7 @@ func (ts *TagCommonService) tagFormatRecommendAndReserved(ctx context.Context, t
 	if tag == nil {
 		return
 	}
-	tagConfig, err := ts.siteInfoService.GetSiteTag(ctx)
+	tagConfig, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		log.Error(err)
 		return
@@ -659,6 +668,15 @@ func (ts *TagCommonService) CheckChangeReservedTag(ctx context.Context, oldobjec
 
 // ObjectChangeTag change object tag list
 func (ts *TagCommonService) ObjectChangeTag(ctx context.Context, objectTagData *schema.TagChange, minimumTags int) (errorlist []*validator.FormErrorField, err error) {
+	lang := handler.GetLangByCtx(ctx)
+	if len(objectTagData.Tags) != 1 {
+		errorlist := make([]*validator.FormErrorField, 0, 1)
+		errorlist = append(errorlist, &validator.FormErrorField{
+			ErrorField: "tags",
+			ErrorMsg:   translator.Tr(lang, reason.QuestionSingleTagRequired),
+		})
+		return errorlist, errors.BadRequest(reason.QuestionSingleTagRequired)
+	}
 	// checks if the tags sent in the put req are less than the minimum, if so, tag changes are not applied
 	if len(objectTagData.Tags) < minimumTags {
 		errorlist := make([]*validator.FormErrorField, 0)
@@ -674,7 +692,16 @@ func (ts *TagCommonService) ObjectChangeTag(ctx context.Context, objectTagData *
 	thisObjTagNameList := make([]string, 0)
 	thisObjTagIDList := make([]string, 0)
 	for _, t := range objectTagData.Tags {
-		t.SlugName = strings.ToLower(t.SlugName)
+		normalizedSlug, slugErr := normalizeAndValidateHierarchicalSlug(t.SlugName)
+		if slugErr != nil {
+			errorlist := make([]*validator.FormErrorField, 0, 1)
+			errorlist = append(errorlist, &validator.FormErrorField{
+				ErrorField: "tags",
+				ErrorMsg:   translator.Tr(lang, reason.TagInvalidHierarchy),
+			})
+			return errorlist, slugErr
+		}
+		t.SlugName = normalizedSlug
 		thisObjTagNameList = append(thisObjTagNameList, t.SlugName)
 	}
 
@@ -686,18 +713,19 @@ func (ts *TagCommonService) ObjectChangeTag(ctx context.Context, objectTagData *
 
 	tagInDbMapping := make(map[string]*entity.Tag)
 	for _, tag := range tagListInDb {
-		tagInDbMapping[strings.ToLower(tag.SlugName)] = tag
+		normalized := constant.NormalizeHierarchicalSlug(tag.SlugName)
+		tagInDbMapping[normalized] = tag
 		thisObjTagIDList = append(thisObjTagIDList, tag.ID)
 	}
 
 	addTagList := make([]*entity.Tag, 0)
 	for _, tag := range objectTagData.Tags {
-		_, ok := tagInDbMapping[strings.ToLower(tag.SlugName)]
+		_, ok := tagInDbMapping[tag.SlugName]
 		if ok {
 			continue
 		}
 		item := &entity.Tag{}
-		item.SlugName = strings.ReplaceAll(tag.SlugName, " ", "-")
+		item.SlugName = tag.SlugName
 		item.DisplayName = tag.DisplayName
 		item.OriginalText = tag.OriginalText
 		item.ParsedText = tag.ParsedText
@@ -883,8 +911,14 @@ func (ts *TagCommonService) UpdateTag(ctx context.Context, req *schema.UpdateTag
 	}
 
 	// Adding equivalent slug formatting for tag update
-	slugName := strings.ReplaceAll(req.SlugName, " ", "-")
-	slugName = strings.ToLower(slugName)
+	slugName := tagInfo.SlugName
+	if len(strings.TrimSpace(req.SlugName)) > 0 {
+		normalizedSlug, err := normalizeAndValidateHierarchicalSlug(req.SlugName)
+		if err != nil {
+			return err
+		}
+		slugName = normalizedSlug
+	}
 
 	// If the content is the same, ignore it
 	if tagInfo.OriginalText == req.OriginalText &&
@@ -948,6 +982,19 @@ func (ts *TagCommonService) UpdateTag(ctx context.Context, req *schema.UpdateTag
 	}
 
 	return
+}
+
+func normalizeAndValidateHierarchicalSlug(slug string) (string, error) {
+	normalized := constant.NormalizeHierarchicalSlug(slug)
+	if !constant.IsValidHierarchicalSlug(normalized) {
+		return "", errors.BadRequest(reason.TagInvalidHierarchy)
+	}
+	return normalized, nil
+}
+
+// NormalizeAndValidateQuestionTag is an exported helper for question workflows.
+func NormalizeAndValidateQuestionTag(slug string) (string, error) {
+	return normalizeAndValidateHierarchicalSlug(slug)
 }
 
 // MigrateTagQuestions migrate tag question

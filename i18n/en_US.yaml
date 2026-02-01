@@ -237,6 +237,8 @@ backend:
         other: Content cannot be empty.
       content_less_than_minimum:
         other: Not enough content entered.
+      single_tag_required:
+        other: Each question must use exactly one hierarchical tag.
     rank:
       fail_to_meet_the_condition:
         other: Reputation rank fail to meet the condition.
@@ -268,6 +270,8 @@ backend:
         other: You cannot set the synonym of the current tag as itself.
       minimum_count:
         other: Not enough tags were entered.
+      invalid_hierarchy:
+        other: Tag must follow the offering.specialization.topic hierarchy.
     smtp:
       config_from_name_cannot_be_email:
         other: The from name cannot be a email address.
@@ -857,16 +861,6 @@ ui:
     http_403: HTTP Error 403
     logout: Log Out
     posts: Posts
-    ai_assistant: AI Assistant
-  ai_assistant:
-    description: Got a question? Ask it and get answers, perspectives, and recommendations.
-    recent_conversations: Recent Conversations
-    show_more: Show more
-    new: New chat
-    ai_generate: AI-generated from posts and may not be accurate.
-    copy: Copy
-    ask_a_follow_up: Ask a follow-up
-    ask_placeholder: Ask a question
   notifications:
     title: Notifications
     inbox: Inbox
@@ -1032,6 +1026,7 @@ ui:
             empty: URL slug cannot be empty.
             range: URL slug up to 35 characters.
             character: URL slug contains unallowed character set.
+            pattern: Use the offering.specialization.topic format (example: customer.fullstack-development.react).
         desc:
           label: Description
         revision:
@@ -1202,6 +1197,7 @@ ui:
     hint_more_than_one_tag: "Describe what your content is about, at least {{min_tags_number}} tags are required."
     no_result: No tags matched
     tag_required_text: Required tag (at least one)
+    hierarchy_hint: Select one offering.specialization.topic tag (example: customer.fullstack-development.react).
   header:
     nav:
       question: Questions
@@ -1628,6 +1624,7 @@ ui:
     recommend: Recommend
     score: Score
     unanswered: Unanswered
+    hierarchy: Hierarchy
     modified: modified
     answered: answered
     asked: asked
@@ -1826,18 +1823,6 @@ ui:
     plugins: Plugins
     installed_plugins: Installed Plugins
     apperance: Appearance
-    community: Community
-    advanced: Advanced
-    tags: Tags
-    rules: Rules
-    policies: Policies
-    security: Security
-    files: Files
-    apikeys: API Keys
-    intelligence: Intelligence
-    ai_assistant: AI Assistant
-    ai_settings: AI Settings
-    mcp: MCP
   website_welcome: Welcome to {{site_name}}
   user_center:
     login: Login
@@ -2150,7 +2135,7 @@ ui:
         always_display: Always display external content
         ask_before_display: Ask before displaying external content
     write:
-      page_title: Files
+      page_title: Write
       min_content:
         label: Minimum question body length
         text: Minimum allowed question body length in characters.
@@ -2208,10 +2193,6 @@ ui:
       primary_color:
         label: Primary color
         text: Modify the colors used by your themes
-      layout:
-        label: Layout
-        full_width: Full-width
-        fixed_width: Fixed-width
     css_and_html:
       page_title: CSS and HTML
       custom_css:
@@ -2313,70 +2294,6 @@ ui:
       show_logs: Show logs
       status: Status
       title: Badges
-    apikeys:
-      title: API Keys
-      add_api_key: Add API Key
-      desc: Description
-      scope: Scope
-      key: Key
-      created: Created
-      last_used: Last used
-      add_or_edit_modal:
-        add_title: Add API Key
-        edit_title: Edit API Key
-        description: Description
-        description_required: Description is required.
-        scope: Scope
-        global: Global
-        read-only: Read-only
-      created_modal:
-        title: API key created
-        api_key: API key
-        description: This key will not be displayed again. Make sure you take a copy before continuing.
-      delete_modal:
-        title: Delete API Key
-        content: Any applications or scripts using this key will no longer be able to access the API. This is permanent!
-    ai_settings:
-      enabled:
-        label: AI enabled
-        check: Enable AI features
-        text: The AI model must be configured correctly before it can be used.
-      provider:
-        label: Provider
-      api_host:
-        label: API host
-        msg: API host is required
-      api_key:
-        label: API key
-        check: Check
-        check_success: "Connection successful."
-        msg: API key is required
-      model:
-        label: Model
-        msg: Model is required
-      add_success: AI settings updated successfully.
-    conversations:
-      topic: Topic
-      helpful: Helpful
-      unhelpful: Unhelpful
-      created: Created
-      action: Action
-      empty: No conversations found.
-      delete_modal:
-        title: Delete conversation
-        content: Are you sure you want to delete this conversation? This is permanent!
-        delete_success: Conversation deleted successfully.
-    mcp:
-      mcp_server:
-        label: MCP server
-        switch: Enabled
-      type:
-        label: Type
-      url:
-        label: URL
-      http_header:
-        label: HTTP header
-        text: Please replace {key} with the API Key.
   form:
     optional: (optional)
     empty: cannot be empty
@@ -2473,7 +2390,6 @@ ui:
     user_normal: This user is already normal.
     user_suspended: This user has been suspended.
     user_deleted: This user has been deleted.
-    user_added: User has been added successfully.
     badge_activated: This badge has been activated.
     badge_inactivated: This badge has been inactivated.
     users_deleted: These users have been deleted.
