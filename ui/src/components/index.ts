@@ -64,10 +64,6 @@ import CardBadge from './CardBadge';
 import PinList from './PinList';
 import MobileSideNav from './MobileSideNav';
 import AdminSideNav from './AdminSideNav';
-import BubbleAi from './BubbleAi';
-import BubbleUser from './BubbleUser';
-import Sender from './Sender';
-import TabNav from './TabNav';
 
 export {
   Avatar,
@@ -119,9 +115,5 @@ export {
   PinList,
   MobileSideNav,
   AdminSideNav,
-  BubbleAi,
-  BubbleUser,
-  Sender,
-  TabNav,
 };
 export type { EditorRef, JSONSchema, UISchema };

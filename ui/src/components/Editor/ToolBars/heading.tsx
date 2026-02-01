@@ -22,8 +22,9 @@ import { Dropdown } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
 import ToolItem from '../toolItem';
-import { Editor, Level } from '../types';
+import { IEditorContext } from '../types';
 
+let context: IEditorContext;
 const Heading = () => {
   const { t } = useTranslation('translation', { keyPrefix: 'editor' });
   const headerList = [
@@ -60,18 +61,19 @@ const Heading = () => {
   };
   const [isShow, setShowState] = useState(false);
   const [isLocked, setLockState] = useState(false);
-  const [currentEditor, setCurrentEditor] = useState<Editor | null>(null);
 
-  const handleClick = (level: Level = 2, label?: string) => {
-    if (!currentEditor) {
-      return;
-    }
-    currentEditor.insertHeading(level, label);
-    currentEditor.focus();
+  const handleClick = (level = 2, label = '大标题') => {
+    const { replaceLines } = context;
+
+    replaceLines((line) => {
+      line = line.trim().replace(/^#*/, '').trim();
+      line = `${'#'.repeat(level)} ${line || label}`;
+      return line;
+    }, level + 1);
     setShowState(false);
   };
-  const onAddHeader = (editor: Editor) => {
-    setCurrentEditor(editor);
+  const onAddHeader = (ctx) => {
+    context = ctx;
     if (isLocked) {
       return;
     }
@@ -102,7 +104,7 @@ const Heading = () => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleClick(header.level as Level, header.label);
+                handleClick(header.level, header.label);
               }}
               dangerouslySetInnerHTML={{ __html: header.text }}
             />

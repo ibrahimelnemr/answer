@@ -22,14 +22,12 @@ import { Outlet, useLocation, ScrollRestoration } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 
 import { SWRConfig } from 'swr';
-import classnames from 'classnames';
 
 import {
   toastStore,
   loginToContinueStore,
   errorCodeStore,
-  siteSecurityStore,
-  themeSettingStore,
+  siteLealStore,
 } from '@/stores';
 import {
   Header,
@@ -49,7 +47,7 @@ const Layout: FC = () => {
   const location = useLocation();
   const { msg: toastMsg, variant, clear: toastClear } = toastStore();
   const externalToast = useExternalToast();
-  const externalContentDisplay = siteSecurityStore(
+  const externalContentDisplay = siteLealStore(
     (state) => state.external_content_display,
   );
   const closeToast = () => {
@@ -58,7 +56,7 @@ const Layout: FC = () => {
   const { code: httpStatusCode, reset: httpStatusReset } = errorCodeStore();
   const { show: showLoginToContinueModal } = loginToContinueStore();
   const { data: notificationData } = useQueryNotificationStatus();
-  const layout = themeSettingStore((state) => state.layout);
+
   useEffect(() => {
     // handle footnote links
     const fixFootnoteLinks = () => {
@@ -211,11 +209,7 @@ const Layout: FC = () => {
           revalidateOnFocus: false,
         }}>
         <Header />
-        <div
-          className={classnames(
-            'position-relative page-wrap d-flex flex-column flex-fill',
-            layout === 'Fixed-width' ? 'container-xxl' : '',
-          )}>
+        <div className="position-relative page-wrap d-flex flex-column flex-fill">
           {httpStatusCode ? (
             <HttpErrorContent httpCode={httpStatusCode} />
           ) : (

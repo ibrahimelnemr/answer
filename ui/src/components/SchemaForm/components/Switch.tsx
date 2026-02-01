@@ -51,7 +51,6 @@ const Index: FC<Props> = ({
       onChange(state);
     }
   };
-
   return (
     <Form.Check
       name={fieldName}
@@ -60,7 +59,7 @@ const Index: FC<Props> = ({
       checked={fieldObject?.value || ''}
       feedback={fieldObject?.errorMsg}
       feedbackType="invalid"
-      isInvalid={fieldObject?.isInvalid}
+      isInvalid={fieldObject.isInvalid}
       disabled={readOnly}
       onChange={handleChange}
     />

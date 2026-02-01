@@ -21,11 +21,16 @@ import { FC, useContext, useEffect } from 'react';
 import { Dropdown, Button } from 'react-bootstrap';
 
 import { EditorContext } from './EditorContext';
-import { Editor } from './types';
+import { IEditorContext } from './types';
 
 interface IProps {
   keyMap?: string[];
-  onClick?: (editor: Editor) => void;
+  onClick?: ({
+    editor,
+    wrapText,
+    replaceLines,
+    appendBlock,
+  }: IEditorContext) => void;
   tip?: string;
   className?: string;
   as?: any;
@@ -33,7 +38,12 @@ interface IProps {
   label?: string;
   disable?: boolean;
   isShow?: boolean;
-  onBlur?: (editor: Editor) => void;
+  onBlur?: ({
+    editor,
+    wrapText,
+    replaceLines,
+    appendBlock,
+  }: IEditorContext) => void;
 }
 const ToolItem: FC<IProps> = (props) => {
   const editor = useContext(EditorContext);
@@ -62,8 +72,12 @@ const ToolItem: FC<IProps> = (props) => {
     keyMap.forEach((key) => {
       editor?.addKeyMap({
         [key]: () => {
-          onClick?.(editor);
-          return true;
+          onClick?.({
+            editor,
+            wrapText: editor?.wrapText,
+            replaceLines: editor?.replaceLines,
+            appendBlock: editor?.appendBlock,
+          });
         },
       });
     });
@@ -80,15 +94,21 @@ const ToolItem: FC<IProps> = (props) => {
       tabIndex={-1}
       onClick={(e) => {
         e.preventDefault();
-        if (editor) {
-          onClick?.(editor);
-        }
+        onClick?.({
+          editor,
+          wrapText: editor?.wrapText,
+          replaceLines: editor?.replaceLines,
+          appendBlock: editor?.appendBlock,
+        });
       }}
       onBlur={(e) => {
         e.preventDefault();
-        if (editor) {
-          onBlur?.(editor);
-        }
+        onBlur?.({
+          editor,
+          wrapText: editor?.wrapText,
+          replaceLines: editor?.replaceLines,
+          appendBlock: editor?.appendBlock,
+        });
       }}>
       <i className={`bi bi-${label}`} />
     </Button>

@@ -25,7 +25,7 @@ import (
 
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	"github.com/apache/answer/pkg/converter"
 	"github.com/apache/answer/pkg/uid"
 	"github.com/segmentfault/pacman/log"
@@ -49,13 +49,13 @@ type ActivityRepo interface {
 
 type ActivityCommon struct {
 	activityRepo         ActivityRepo
-	activityQueueService activityqueue.Service
+	activityQueueService activity_queue.ActivityQueueService
 }
 
 // NewActivityCommon new activity common
 func NewActivityCommon(
 	activityRepo ActivityRepo,
-	activityQueueService activityqueue.Service,
+	activityQueueService activity_queue.ActivityQueueService,
 ) *ActivityCommon {
 	activity := &ActivityCommon{
 		activityRepo:         activityRepo,

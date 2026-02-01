@@ -74,21 +74,16 @@ func (m *Mentor) InitDB() error {
 	m.do("init role power rel", m.initRolePowerRel)
 	m.do("init admin user role rel", m.initAdminUserRoleRel)
 	m.do("init site info interface", m.initSiteInfoInterface)
-	m.do("init site info users settings", m.initSiteInfoUsersSettings)
 	m.do("init site info general config", m.initSiteInfoGeneralData)
 	m.do("init site info login config", m.initSiteInfoLoginConfig)
 	m.do("init site info theme config", m.initSiteInfoThemeConfig)
 	m.do("init site info seo config", m.initSiteInfoSEOConfig)
 	m.do("init site info user config", m.initSiteInfoUsersConfig)
 	m.do("init site info privilege rank", m.initSiteInfoPrivilegeRank)
-	m.do("init site info write", m.initSiteInfoAdvanced)
-	m.do("init site info write", m.initSiteInfoQuestions)
-	m.do("init site info write", m.initSiteInfoTags)
-	m.do("init site info security", m.initSiteInfoSecurityConfig)
+	m.do("init site info write", m.initSiteInfoWrite)
+	m.do("init site info legal", m.initSiteInfoLegalConfig)
 	m.do("init default content", m.initDefaultContent)
 	m.do("init default badges", m.initDefaultBadges)
-	m.do("init default ai config", m.initSiteInfoAI)
-	m.do("init default MCP config", m.initSiteInfoMCP)
 	return m.err
 }
 
@@ -186,26 +181,15 @@ func (m *Mentor) initSiteInfoInterface() {
 	}
 
 	interfaceData := map[string]string{
-		"language":  m.userData.Language,
-		"time_zone": localTimezone,
-	}
-	interfaceDataBytes, _ := json.Marshal(interfaceData)
-	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "interface_settings",
-		Content: string(interfaceDataBytes),
-		Status:  1,
-	})
-}
-
-func (m *Mentor) initSiteInfoUsersSettings() {
-	usersSettings := map[string]any{
+		"language":          m.userData.Language,
+		"time_zone":         localTimezone,
 		"default_avatar":    "gravatar",
 		"gravatar_base_url": "https://www.gravatar.com/avatar/",
 	}
-	usersSettingsDataBytes, _ := json.Marshal(usersSettings)
+	interfaceDataBytes, _ := json.Marshal(interfaceData)
 	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "users_settings",
-		Content: string(usersSettingsDataBytes),
+		Type:    "interface",
+		Content: string(interfaceDataBytes),
 		Status:  1,
 	})
 }
@@ -229,6 +213,7 @@ func (m *Mentor) initSiteInfoLoginConfig() {
 		"allow_new_registrations":   true,
 		"allow_email_registrations": true,
 		"allow_password_login":      true,
+		"login_required":            m.userData.LoginRequired,
 	}
 	loginConfigDataBytes, _ := json.Marshal(loginConfig)
 	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
@@ -238,22 +223,20 @@ func (m *Mentor) initSiteInfoLoginConfig() {
 	})
 }
 
-func (m *Mentor) initSiteInfoSecurityConfig() {
-	securityConfig := map[string]any{
-		"login_required":           m.userData.LoginRequired,
+func (m *Mentor) initSiteInfoLegalConfig() {
+	legalConfig := map[string]any{
 		"external_content_display": m.userData.ExternalContentDisplay,
-		"check_update":             true,
 	}
-	securityConfigDataBytes, _ := json.Marshal(securityConfig)
+	legalConfigDataBytes, _ := json.Marshal(legalConfig)
 	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "security",
-		Content: string(securityConfigDataBytes),
+		Type:    "legal",
+		Content: string(legalConfigDataBytes),
 		Status:  1,
 	})
 }
 
 func (m *Mentor) initSiteInfoThemeConfig() {
-	themeConfig := fmt.Sprintf(`{"theme":"default","theme_config":{"default":{"navbar_style":"#0033ff","primary_color":"#0033ff"}},"layout":"%s"}`, constant.ThemeLayoutFullWidth)
+	themeConfig := `{"theme":"default","theme_config":{"default":{"navbar_style":"#0033ff","primary_color":"#0033ff"}}}`
 	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
 		Type:    "theme",
 		Content: themeConfig,
@@ -305,46 +288,24 @@ func (m *Mentor) initSiteInfoPrivilegeRank() {
 	})
 }
 
-func (m *Mentor) initSiteInfoAdvanced() {
-	advancedData := map[string]any{
+func (m *Mentor) initSiteInfoWrite() {
+	writeData := map[string]any{
+		"min_content":                      6,
+		"restrict_answer":                  true,
+		"min_tags":                         1,
+		"required_tag":                     false,
+		"recommend_tags":                   []string{},
+		"reserved_tags":                    []string{},
 		"max_image_size":                   4,
 		"max_attachment_size":              8,
 		"max_image_megapixel":              40,
 		"authorized_image_extensions":      []string{"jpg", "jpeg", "png", "gif", "webp"},
 		"authorized_attachment_extensions": []string{},
 	}
-	advancedDataBytes, _ := json.Marshal(advancedData)
+	writeDataBytes, _ := json.Marshal(writeData)
 	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "advanced",
-		Content: string(advancedDataBytes),
-		Status:  1,
-	})
-}
-
-func (m *Mentor) initSiteInfoQuestions() {
-	questionsData := map[string]any{
-		"min_tags":        1,
-		"min_content":     6,
-		"restrict_answer": true,
-	}
-	questionsDataBytes, _ := json.Marshal(questionsData)
-	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "questions",
-		Content: string(questionsDataBytes),
-		Status:  1,
-	})
-}
-
-func (m *Mentor) initSiteInfoTags() {
-	tagsData := map[string]any{
-		"required_tag":   false,
-		"recommend_tags": []string{},
-		"reserved_tags":  []string{},
-	}
-	tagsDataBytes, _ := json.Marshal(tagsData)
-	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    "tags",
-		Content: string(tagsDataBytes),
+		Type:    "write",
+		Content: string(writeDataBytes),
 		Status:  1,
 	})
 }
@@ -607,30 +568,4 @@ func (m *Mentor) initDefaultBadges() {
 			return
 		}
 	}
-}
-
-func (m *Mentor) initSiteInfoAI() {
-	content := &schema.SiteAIReq{
-		PromptConfig: &schema.AIPromptConfig{
-			ZhCN: constant.DefaultAIPromptConfigZhCN,
-			EnUS: constant.DefaultAIPromptConfigEnUS,
-		},
-	}
-	writeDataBytes, _ := json.Marshal(content)
-	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    constant.SiteTypeAI,
-		Content: string(writeDataBytes),
-		Status:  1,
-	})
-}
-func (m *Mentor) initSiteInfoMCP() {
-	content := &schema.SiteMCPReq{
-		Enabled: true,
-	}
-	writeDataBytes, _ := json.Marshal(content)
-	_, m.err = m.engine.Context(m.ctx).Insert(&entity.SiteInfo{
-		Type:    constant.SiteTypeMCP,
-		Content: string(writeDataBytes),
-		Status:  1,
-	})
 }

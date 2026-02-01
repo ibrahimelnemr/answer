@@ -35,9 +35,9 @@ const interfaceSetting = create<InterfaceType>((set) => ({
     gravatar_base_url: '',
   },
   update: (params) =>
-    set((state) => {
+    set(() => {
       return {
-        interface: { ...state.interface, ...params },
+        interface: params,
       };
     }),
 }));

@@ -23,10 +23,8 @@ import (
 	"context"
 
 	"github.com/apache/answer/internal/entity"
-	"github.com/apache/answer/internal/service/apikey"
 	"github.com/apache/answer/pkg/token"
 	"github.com/apache/answer/plugin"
-	"github.com/segmentfault/pacman/log"
 )
 
 // AuthRepo auth repository
@@ -48,15 +46,13 @@ type AuthRepo interface {
 
 // AuthService kit service
 type AuthService struct {
-	authRepo   AuthRepo
-	apiKeyRepo apikey.APIKeyRepo
+	authRepo AuthRepo
 }
 
 // NewAuthService email service
-func NewAuthService(authRepo AuthRepo, apiKeyRepo apikey.APIKeyRepo) *AuthService {
+func NewAuthService(authRepo AuthRepo) *AuthService {
 	return &AuthService{
-		authRepo:   authRepo,
-		apiKeyRepo: apiKeyRepo,
+		authRepo: authRepo,
 	}
 }
 
@@ -155,20 +151,4 @@ func (as *AuthService) SetAdminUserCacheInfo(ctx context.Context, accessToken st
 
 func (as *AuthService) RemoveAdminUserCacheInfo(ctx context.Context, accessToken string) (err error) {
 	return as.authRepo.RemoveAdminUserCacheInfo(ctx, accessToken)
-}
-func (as *AuthService) AuthAPIKey(ctx context.Context, read bool, apiKey string) (pass bool, err error) {
-	apiKeyInfo, exist, err := as.apiKeyRepo.GetAPIKey(ctx, apiKey)
-	if err != nil {
-		return false, err
-	}
-	if !exist {
-		return false, nil
-	}
-	// If the request is not read-only, check if the API key has write permissions
-	if !read && apiKeyInfo.Scope == "read-only" {
-		log.Warnf("API key %s does not have write permissions", apiKeyInfo.AccessKey)
-		return false, nil
-	}
-	log.Infof("API key %s is valid, scope: %s", apiKeyInfo.AccessKey, apiKeyInfo.Scope)
-	return true, nil
 }

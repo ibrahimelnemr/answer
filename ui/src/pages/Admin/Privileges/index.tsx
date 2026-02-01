@@ -22,13 +22,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useToast } from '@/hooks';
 import { FormDataType } from '@/common/interface';
-import {
-  JSONSchema,
-  SchemaForm,
-  UISchema,
-  initFormData,
-  TabNav,
-} from '@/components';
+import { JSONSchema, SchemaForm, UISchema, initFormData } from '@/components';
 import {
   getPrivilegeSetting,
   putPrivilegeSetting,
@@ -36,10 +30,7 @@ import {
   AdminSettingsPrivilegeReq,
 } from '@/services';
 import { handleFormError, scrollToElementTop } from '@/utils';
-import {
-  ADMIN_PRIVILEGE_CUSTOM_LEVEL,
-  ADMIN_RULES_NAV_MENUS,
-} from '@/common/constants';
+import { ADMIN_PRIVILEGE_CUSTOM_LEVEL } from '@/common/constants';
 
 const Index: FC = () => {
   const { t } = useTranslation('translation', {
@@ -196,17 +187,14 @@ const Index: FC = () => {
 
   return (
     <>
-      <h3 className="mb-4">{t('rules', { keyPrefix: 'nav_menus' })}</h3>
-      <TabNav menus={ADMIN_RULES_NAV_MENUS} />
-      <div className="max-w-748">
-        <SchemaForm
-          schema={schema}
-          uiSchema={uiSchema}
-          formData={formData}
-          onSubmit={onSubmit}
-          onChange={handleOnChange}
-        />
-      </div>
+      <h3 className="mb-4">{t('title')}</h3>
+      <SchemaForm
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        onSubmit={onSubmit}
+        onChange={handleOnChange}
+      />
     </>
   );
 };

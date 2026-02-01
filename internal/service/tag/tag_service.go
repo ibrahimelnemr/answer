@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/apache/answer/internal/base/constant"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	"github.com/apache/answer/internal/service/revision_common"
 	"github.com/apache/answer/internal/service/siteinfo_common"
 	tagcommonser "github.com/apache/answer/internal/service/tag_common"
@@ -50,7 +50,7 @@ type TagService struct {
 	revisionService      *revision_common.RevisionService
 	followCommon         activity_common.FollowRepo
 	siteInfoService      siteinfo_common.SiteInfoCommonService
-	activityQueueService activityqueue.Service
+	activityQueueService activity_queue.ActivityQueueService
 }
 
 // NewTagService new tag service
@@ -60,7 +60,7 @@ func NewTagService(
 	revisionService *revision_common.RevisionService,
 	followCommon activity_common.FollowRepo,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
-	activityQueueService activityqueue.Service,
+	activityQueueService activity_queue.ActivityQueueService,
 ) *TagService {
 	return &TagService{
 		tagRepo:              tagRepo,

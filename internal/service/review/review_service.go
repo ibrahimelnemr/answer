@@ -29,7 +29,7 @@ import (
 	"github.com/apache/answer/internal/schema"
 	answercommon "github.com/apache/answer/internal/service/answer_common"
 	commentcommon "github.com/apache/answer/internal/service/comment_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/object_info"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
 	"github.com/apache/answer/internal/service/role"
@@ -66,8 +66,8 @@ type ReviewService struct {
 	userRoleService                  *role.UserRoleRelService
 	tagCommon                        *tagcommon.TagCommonService
 	questionCommon                   *questioncommon.QuestionCommon
-	externalNotificationQueueService noticequeue.ExternalService
-	notificationQueueService         noticequeue.Service
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService
+	notificationQueueService         notice_queue.NotificationQueueService
 	siteInfoService                  siteinfo_common.SiteInfoCommonService
 	commentCommonRepo                commentcommon.CommentCommonRepo
 }
@@ -81,10 +81,10 @@ func NewReviewService(
 	questionRepo questioncommon.QuestionRepo,
 	answerRepo answercommon.AnswerRepo,
 	userRoleService *role.UserRoleRelService,
-	externalNotificationQueueService noticequeue.ExternalService,
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService,
 	tagCommon *tagcommon.TagCommonService,
 	questionCommon *questioncommon.QuestionCommon,
-	notificationQueueService noticequeue.Service,
+	notificationQueueService notice_queue.NotificationQueueService,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
 	commentCommonRepo commentcommon.CommentCommonRepo,
 ) *ReviewService {

@@ -169,15 +169,13 @@ const Index: FC = () => {
   return (
     <ImgViewer>
       <h3 className="mb-4">{t('page_title')}</h3>
-      <div className="max-w-748">
-        <SchemaForm
-          schema={schema}
-          uiSchema={uiSchema}
-          formData={formData}
-          onSubmit={onSubmit}
-          onChange={handleOnChange}
-        />
-      </div>
+      <SchemaForm
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        onSubmit={onSubmit}
+        onChange={handleOnChange}
+      />
     </ImgViewer>
   );
 };

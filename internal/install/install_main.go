@@ -25,18 +25,12 @@ import (
 
 	"github.com/apache/answer/internal/base/path"
 	"github.com/apache/answer/internal/base/translator"
-	"github.com/joho/godotenv"
 )
 
 var (
-	port     string
+	port     = os.Getenv("INSTALL_PORT")
 	confPath = ""
 )
-
-func init() {
-	_ = godotenv.Load()
-	port = os.Getenv("INSTALL_PORT")
-}
 
 func Run(configPath string) {
 	confPath = configPath

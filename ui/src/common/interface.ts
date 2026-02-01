@@ -364,6 +364,7 @@ export interface AdminSettingsGeneral {
   description: string;
   site_url: string;
   contact_email: string;
+  check_update: boolean;
   permalink?: number;
 }
 
@@ -381,6 +382,8 @@ export interface HelmetUpdate extends Omit<HelmetBase, 'pageTitle'> {
 export interface AdminSettingsInterface {
   language: string;
   time_zone?: string;
+  default_avatar: string;
+  gravatar_base_url: string;
 }
 
 export interface AdminSettingsSmtp {
@@ -402,14 +405,6 @@ export interface AdminSettingsUsers {
   allow_update_location: boolean;
   allow_update_username: boolean;
   allow_update_website: boolean;
-  default_avatar: string;
-  gravatar_base_url: string;
-}
-
-export interface AdminSettingsSecurity {
-  external_content_display: string;
-  check_update: boolean;
-  login_required: boolean;
 }
 
 export interface SiteSettings {
@@ -421,13 +416,10 @@ export interface SiteSettings {
   theme: AdminSettingsTheme;
   site_seo: AdminSettingsSeo;
   site_users: AdminSettingsUsers;
-  site_advanced: AdminSettingsWrite;
-  site_questions: AdminQuestionSetting;
-  site_tags: AdminTagsSetting;
+  site_write: AdminSettingsWrite;
   version: string;
   revision: string;
-  site_security: AdminSettingsSecurity;
-  ai_enabled: boolean;
+  site_legal: AdminSettingsLegal;
 }
 
 export interface AdminSettingBranding {
@@ -438,6 +430,7 @@ export interface AdminSettingBranding {
 }
 
 export interface AdminSettingsLegal {
+  external_content_display: string;
   privacy_policy_original_text?: string;
   privacy_policy_parsed_text?: string;
   terms_of_service_original_text?: string;
@@ -445,6 +438,12 @@ export interface AdminSettingsLegal {
 }
 
 export interface AdminSettingsWrite {
+  restrict_answer?: boolean;
+  min_tags?: number;
+  min_content?: number;
+  recommend_tags?: Tag[];
+  required_tag?: boolean;
+  reserved_tags?: Tag[];
   max_image_size?: number;
   max_attachment_size?: number;
   max_image_megapixel?: number;
@@ -470,7 +469,6 @@ export type themeConfig = {
 export interface AdminSettingsTheme {
   theme: string;
   color_scheme: string;
-  layout: string;
   theme_options?: { label: string; value: string }[];
   theme_config: Record<string, themeConfig>;
 }
@@ -485,6 +483,7 @@ export interface AdminSettingsCustom {
 
 export interface AdminSettingsLogin {
   allow_new_registrations: boolean;
+  login_required: boolean;
   allow_email_registrations: boolean;
   allow_email_domains: string[];
   allow_password_login: boolean;
@@ -808,86 +807,4 @@ export interface BadgeDetailListItem {
 export interface BadgeDetailListRes {
   count: number;
   list: BadgeDetailListItem[];
-}
-
-export interface AdminApiKeysItem {
-  access_key: string;
-  created_at: number;
-  description: string;
-  id: number;
-  last_used_at: number;
-  scope: string;
-}
-
-export interface AddOrEditApiKeyParams {
-  description: string;
-  scope?: string;
-  id?: number;
-}
-
-export interface AiConfig {
-  enabled: boolean;
-  chosen_provider: string;
-  ai_providers: Array<{
-    provider: string;
-    api_host: string;
-    api_key: string;
-    model: string;
-  }>;
-}
-
-export interface AiProviderItem {
-  name: string;
-  display_name: string;
-  default_api_host: string;
-}
-
-export interface ConversationListItem {
-  conversation_id: string;
-  created_at: number;
-  topic: string;
-}
-
-export interface AdminConversationListItem {
-  id: string;
-  topic: string;
-  helpful_count: number;
-  unhelpful_count: number;
-  created_at: number;
-  user_info: UserInfoBase;
-}
-
-export interface ConversationDetailItem {
-  chat_completion_id: string;
-  content: string;
-  role: string;
-  helpful: number;
-  unhelpful: number;
-  created_at: number;
-}
-
-export interface ConversationDetail {
-  conversation_id: string;
-  created_at: number;
-  records: ConversationDetailItem[];
-  topic: string;
-  updated_at: number;
-}
-
-export interface VoteConversationParams {
-  cancel: boolean;
-  chat_completion_id: string;
-  vote_type: 'helpful' | 'unhelpful';
-}
-
-export interface AdminQuestionSetting {
-  min_tags: number;
-  min_content: number;
-  restrict_answer: boolean;
-}
-
-export interface AdminTagsSetting {
-  recommend_tags: Tag[];
-  required_tag: boolean;
-  reserved_tags: Tag[];
 }

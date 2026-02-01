@@ -27,7 +27,6 @@ import { useCaptchaPlugin } from '@/utils/pluginKit';
 import { Pagination } from '@/components';
 import { getSearchResult } from '@/services';
 import type { SearchParams, SearchRes } from '@/common/interface';
-import { logged } from '@/utils/guard';
 
 import {
   Head,
@@ -36,12 +35,10 @@ import {
   Tips,
   Empty,
   ListLoader,
-  AiCard,
 } from './components';
 
 const Index = () => {
   const { t } = useTranslation('translation');
-  const isLogged = logged().ok;
   const [searchParams] = useSearchParams();
   const page = searchParams.get('page') || 1;
   const q = searchParams.get('q') || '';
@@ -109,7 +106,6 @@ const Index = () => {
     <Row className="pt-4 mb-5">
       <Col className="page-main flex-auto">
         <Head data={extra} />
-        {isLogged && <AiCard />}
         <SearchHead sort={order} count={isLoading ? -1 : count} />
         <ListGroup className="rounded-0 mb-5">
           {isSkeletonShow ? (

@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import type * as Type from '@/common/interface';
-import { siteSecurityStore } from '@/stores';
+import { siteInfoStore } from '@/stores';
 
 const { gt, gte } = require('semver');
 
@@ -34,7 +34,7 @@ interface IProps {
 const HealthStatus: FC<IProps> = ({ data }) => {
   const { t } = useTranslation('translation', { keyPrefix: 'admin.dashboard' });
   const { version, remote_version } = data.version_info || {};
-  const { check_update } = siteSecurityStore.getState();
+  const { siteInfo } = siteInfoStore();
   let isLatest = false;
   let hasNewerVersion = false;
   const downloadUrl = `https://answer.apache.org/download?from_version=${version}`;
@@ -68,7 +68,7 @@ const HealthStatus: FC<IProps> = ({ data }) => {
                 {t('update_to')} {remote_version}
               </a>
             )}
-            {!isLatest && !remote_version && check_update && (
+            {!isLatest && !remote_version && siteInfo.check_update && (
               <a
                 className="ms-1 badge rounded-pill text-bg-danger"
                 target="_blank"

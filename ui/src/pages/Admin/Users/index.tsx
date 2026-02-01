@@ -32,7 +32,6 @@ import {
   Empty,
   QueryGroup,
   Modal,
-  TabNav,
 } from '@/components';
 import * as Type from '@/common/interface';
 import { useUserModal } from '@/hooks';
@@ -46,7 +45,6 @@ import {
   deletePermanently,
 } from '@/services';
 import { formatCount } from '@/utils';
-import { ADMIN_USERS_NAV_MENUS } from '@/common/constants';
 
 import DeleteUserModal from './components/DeleteUserModal';
 import Action from './components/Action';
@@ -111,14 +109,9 @@ const Users: FC = () => {
       return new Promise((resolve, reject) => {
         addUsers(userModel)
           .then(() => {
-            toastStore.getState().show({
-              msg: t('user_added', { keyPrefix: 'messages' }),
-              variant: 'success',
-            });
-            urlSearchParams.set('filter', 'normal');
-            urlSearchParams.delete('page');
-            setUrlSearchParams(urlSearchParams);
-            refreshUsers();
+            if (/all|staff/.test(curFilter) && curPage === 1) {
+              refreshUsers();
+            }
             resolve(true);
           })
           .catch((e) => {
@@ -210,7 +203,6 @@ const Users: FC = () => {
   return (
     <>
       <h3 className="mb-4">{t('title')}</h3>
-      <TabNav menus={ADMIN_USERS_NAV_MENUS} />
       <div className="d-flex flex-wrap justify-content-between align-items-center">
         <Stack direction="horizontal" gap={3} className="mb-3">
           <QueryGroup

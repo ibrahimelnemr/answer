@@ -224,15 +224,13 @@ const Smtp: FC = () => {
   return (
     <>
       <h3 className="mb-4">{t('page_title')}</h3>
-      <div className="max-w-748">
-        <SchemaForm
-          schema={schema}
-          uiSchema={uiSchema}
-          formData={formData}
-          onChange={handleOnChange}
-          onSubmit={onSubmit}
-        />
-      </div>
+      <SchemaForm
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        onChange={handleOnChange}
+        onSubmit={onSubmit}
+      />
     </>
   );
 };

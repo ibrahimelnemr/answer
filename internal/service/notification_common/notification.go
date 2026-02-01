@@ -35,7 +35,7 @@ import (
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/activity_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/object_info"
 	usercommon "github.com/apache/answer/internal/service/user_common"
 	"github.com/apache/answer/pkg/uid"
@@ -66,7 +66,7 @@ type NotificationCommon struct {
 	followRepo               activity_common.FollowRepo
 	userCommon               *usercommon.UserCommon
 	objectInfoService        *object_info.ObjService
-	notificationQueueService noticequeue.Service
+	notificationQueueService notice_queue.NotificationQueueService
 	userExternalLoginRepo    user_external_login.UserExternalLoginRepo
 	siteInfoService          siteinfo_common.SiteInfoCommonService
 }
@@ -78,7 +78,7 @@ func NewNotificationCommon(
 	activityRepo activity_common.ActivityRepo,
 	followRepo activity_common.FollowRepo,
 	objectInfoService *object_info.ObjService,
-	notificationQueueService noticequeue.Service,
+	notificationQueueService notice_queue.NotificationQueueService,
 	userExternalLoginRepo user_external_login.UserExternalLoginRepo,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
 ) *NotificationCommon {
@@ -421,13 +421,6 @@ func (ns *NotificationCommon) syncNotificationToPlugin(ctx context.Context, objI
 		if len(pluginNotificationMsg.ReceiverLang) == 0 || pluginNotificationMsg.ReceiverLang == translator.DefaultLangOption {
 			pluginNotificationMsg.ReceiverLang = interfaceInfo.Language
 		}
-	}
-
-	externalLogins, err := ns.userExternalLoginRepo.GetUserExternalLoginList(ctx, msg.ReceiverUserID)
-	if err != nil {
-		log.Errorf("get user external login list failed for user %s: %v", msg.ReceiverUserID, err)
-	} else if len(externalLogins) > 0 {
-		pluginNotificationMsg.ReceiverExternalID = externalLogins[0].ExternalID
 	}
 
 	_ = plugin.CallNotification(func(fn plugin.Notification) error {

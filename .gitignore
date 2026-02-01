@@ -33,6 +33,3 @@ dist/
 
 # Lint setup generated file
 .husky/
-
-# Environment variables
-.env

@@ -39,8 +39,6 @@ const defaultUsersConf: AdminSettingsUsers = {
   allow_update_location: false,
   allow_update_username: false,
   allow_update_website: false,
-  default_avatar: 'system',
-  gravatar_base_url: '',
 };
 
 const siteInfo = create<SiteInfoType>((set) => ({
@@ -50,6 +48,7 @@ const siteInfo = create<SiteInfoType>((set) => ({
     short_description: '',
     site_url: '',
     contact_email: '',
+    check_update: true,
     permalink: 1,
   },
   users: defaultUsersConf,

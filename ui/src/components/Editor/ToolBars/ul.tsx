@@ -21,8 +21,9 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ToolItem from '../toolItem';
-import { Editor } from '../types';
+import { IEditorContext } from '../types';
 
+let context: IEditorContext;
 const UL = () => {
   const { t } = useTranslation('translation', { keyPrefix: 'editor' });
   const item = {
@@ -31,8 +32,20 @@ const UL = () => {
     tip: `${t('unordered_list.text')} (Ctrl+u)`,
   };
 
-  const handleClick = (editor: Editor) => {
-    editor.insertUnorderedList();
+  const handleClick = (ctx) => {
+    context = ctx;
+    const { editor, replaceLines } = context;
+
+    replaceLines((line) => {
+      const FIND_UL_RX = /^(\s{0,})(-|\*)\s/;
+
+      if (line.match(FIND_UL_RX)) {
+        line = line.replace(FIND_UL_RX, '');
+      } else {
+        line = `* ${line}`;
+      }
+      return line;
+    });
     editor.focus();
   };
 

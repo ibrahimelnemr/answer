@@ -26,7 +26,6 @@ export enum PluginType {
   Connector = 'connector',
   Search = 'search',
   Editor = 'editor',
-  EditorReplacement = 'editor_replacement',
   Route = 'route',
   Captcha = 'captcha',
   Render = 'render',
@@ -39,7 +38,6 @@ export interface PluginInfo {
   name?: string;
   description?: string;
   route?: string;
-  registrationMode?: 'multiple' | 'singleton';
 }
 
 export interface Plugin {

@@ -35,7 +35,6 @@ type SimpleObjectInfo struct {
 	CommentID           string `json:"comment_id"`
 	CommentStatus       int    `json:"comment_status"`
 	TagID               string `json:"tag_id"`
-	TagStatus           int    `json:"tag_status"`
 	ObjectType          string `json:"object_type"`
 	Title               string `json:"title"`
 	Content             string `json:"content"`
@@ -50,8 +49,6 @@ func (s *SimpleObjectInfo) IsDeleted() bool {
 		return s.AnswerStatus == entity.AnswerStatusDeleted
 	case constant.CommentObjectType:
 		return s.CommentStatus == entity.CommentStatusDeleted
-	case constant.TagObjectType:
-		return s.TagStatus == entity.TagStatusDeleted
 	}
 	return false
 }

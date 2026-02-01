@@ -25,7 +25,7 @@ import { sha256 } from 'js-sha256';
 
 import type { FormDataType } from '@/common/interface';
 import { UploadImg, Avatar, Icon, ImgViewer } from '@/components';
-import { loggedUserInfoStore, userCenterStore, siteInfoStore } from '@/stores';
+import { loggedUserInfoStore, userCenterStore, interfaceStore } from '@/stores';
 import { useToast } from '@/hooks';
 import {
   modifyUserInfo,
@@ -42,7 +42,7 @@ const Index: React.FC = () => {
   const toast = useToast();
   const { user, update } = loggedUserInfoStore();
   const { agent: ucAgent } = userCenterStore();
-  const { users: usersSettings } = siteInfoStore();
+  const { interface: interfaceSetting } = interfaceStore();
   const [mailHash, setMailHash] = useState('');
   const [count] = useState(0);
   const [profileAgent, setProfileAgent] = useState<UcSettingAgent>();
@@ -384,7 +384,7 @@ const Index: React.FC = () => {
                       <span>{t('avatar.gravatar_text')}</span>
                       <a
                         href={
-                          usersSettings.gravatar_base_url.includes(
+                          interfaceSetting.gravatar_base_url.includes(
                             'gravatar.cn',
                           )
                             ? 'https://gravatar.cn'
@@ -393,7 +393,9 @@ const Index: React.FC = () => {
                         className="ms-1"
                         target="_blank"
                         rel="noreferrer">
-                        {usersSettings.gravatar_base_url.includes('gravatar.cn')
+                        {interfaceSetting.gravatar_base_url.includes(
+                          'gravatar.cn',
+                        )
                           ? 'gravatar.cn'
                           : 'gravatar.com'}
                       </a>

@@ -42,6 +42,7 @@ type SiteGeneralReq struct {
 	Description      string `validate:"omitempty,sanitizer,gt=3,lte=2000" form:"description" json:"description"`
 	SiteUrl          string `validate:"required,sanitizer,gt=1,lte=512,url" form:"site_url" json:"site_url"`
 	ContactEmail     string `validate:"required,sanitizer,gt=1,lte=512,email" form:"contact_email" json:"contact_email"`
+	CheckUpdate      bool   `validate:"omitempty,sanitizer" form:"check_update" json:"check_update"`
 }
 
 func (r *SiteGeneralReq) FormatSiteUrl() {
@@ -58,28 +59,11 @@ func (r *SiteGeneralReq) FormatSiteUrl() {
 
 // SiteInterfaceReq site interface request
 type SiteInterfaceReq struct {
-	Language string `validate:"required,gt=1,lte=128" form:"language" json:"language"`
-	TimeZone string `validate:"required,gt=1,lte=128" form:"time_zone" json:"time_zone"`
-	// Deperecated: use SiteUsersSettingsReq instead
-	DefaultAvatar string `validate:"omitempty" json:"-"`
-	// Deperecated: use SiteUsersSettingsReq instead
-	GravatarBaseURL string `validate:"omitempty" json:"-"`
-}
-
-// SiteInterfaceSettingsReq site interface settings request
-type SiteInterfaceSettingsReq struct {
-	Language string `validate:"required,gt=1,lte=128" json:"language"`
-	TimeZone string `validate:"required,gt=1,lte=128" json:"time_zone"`
-}
-
-type SiteInterfaceSettingsResp SiteInterfaceSettingsReq
-
-type SiteUsersSettingsReq struct {
+	Language        string `validate:"required,gt=1,lte=128" form:"language" json:"language"`
+	TimeZone        string `validate:"required,gt=1,lte=128" form:"time_zone" json:"time_zone"`
 	DefaultAvatar   string `validate:"required,oneof=system gravatar" json:"default_avatar"`
 	GravatarBaseURL string `validate:"omitempty" json:"gravatar_base_url"`
 }
-
-type SiteUsersSettingsResp SiteUsersSettingsReq
 
 // SiteBrandingReq site branding request
 type SiteBrandingReq struct {
@@ -89,7 +73,7 @@ type SiteBrandingReq struct {
 	Favicon    string `validate:"omitempty,gt=0,lte=512" form:"favicon" json:"favicon"`
 }
 
-// SiteWriteReq site write request use SiteQuestionsReq, SiteAdvancedReq and SiteTagsReq instead
+// SiteWriteReq site write request
 type SiteWriteReq struct {
 	MinimumContent                 int             `validate:"omitempty,gte=0,lte=65535" json:"min_content"`
 	RestrictAnswer                 bool            `validate:"omitempty" json:"restrict_answer"`
@@ -105,47 +89,21 @@ type SiteWriteReq struct {
 	UserID                         string          `json:"-"`
 }
 
-type SiteWriteResp SiteWriteReq
-
-// SiteQuestionsReq site questions settings request
-type SiteQuestionsReq struct {
-	MinimumTags    int  `validate:"omitempty,gte=0,lte=5" json:"min_tags"`
-	MinimumContent int  `validate:"omitempty,gte=0,lte=65535" json:"min_content"`
-	RestrictAnswer bool `validate:"omitempty" json:"restrict_answer"`
-}
-
-// SiteAdvancedReq site advanced settings request
-type SiteAdvancedReq struct {
-	MaxImageSize                   int      `validate:"omitempty,gt=0" json:"max_image_size"`
-	MaxAttachmentSize              int      `validate:"omitempty,gt=0" json:"max_attachment_size"`
-	MaxImageMegapixel              int      `validate:"omitempty,gt=0" json:"max_image_megapixel"`
-	AuthorizedImageExtensions      []string `validate:"omitempty" json:"authorized_image_extensions"`
-	AuthorizedAttachmentExtensions []string `validate:"omitempty" json:"authorized_attachment_extensions"`
-}
-
-// SiteTagsReq site tags settings request
-type SiteTagsReq struct {
-	ReservedTags  []*SiteWriteTag `validate:"omitempty,dive" json:"reserved_tags"`
-	RecommendTags []*SiteWriteTag `validate:"omitempty,dive" json:"recommend_tags"`
-	RequiredTag   bool            `validate:"omitempty" json:"required_tag"`
-	UserID        string          `json:"-"`
-}
-
-func (s *SiteAdvancedResp) GetMaxImageSize() int64 {
+func (s *SiteWriteResp) GetMaxImageSize() int64 {
 	if s.MaxImageSize <= 0 {
 		return constant.DefaultMaxImageSize
 	}
 	return int64(s.MaxImageSize) * 1024 * 1024
 }
 
-func (s *SiteAdvancedResp) GetMaxAttachmentSize() int64 {
+func (s *SiteWriteResp) GetMaxAttachmentSize() int64 {
 	if s.MaxAttachmentSize <= 0 {
 		return constant.DefaultMaxAttachmentSize
 	}
 	return int64(s.MaxAttachmentSize) * 1024 * 1024
 }
 
-func (s *SiteAdvancedResp) GetMaxImageMegapixel() int {
+func (s *SiteWriteResp) GetMaxImageMegapixel() int {
 	if s.MaxImageMegapixel <= 0 {
 		return constant.DefaultMaxImageMegapixel
 	}
@@ -158,7 +116,7 @@ type SiteWriteTag struct {
 	DisplayName string `json:"display_name"`
 }
 
-// SiteLegalReq site branding request use SitePoliciesReq and SiteSecurityReq instead
+// SiteLegalReq site branding request
 type SiteLegalReq struct {
 	TermsOfServiceOriginalText string `json:"terms_of_service_original_text"`
 	TermsOfServiceParsedText   string `json:"terms_of_service_parsed_text"`
@@ -166,22 +124,6 @@ type SiteLegalReq struct {
 	PrivacyPolicyParsedText    string `json:"privacy_policy_parsed_text"`
 	ExternalContentDisplay     string `validate:"required,oneof=always_display ask_before_display" json:"external_content_display"`
 }
-
-type SitePoliciesReq struct {
-	TermsOfServiceOriginalText string `json:"terms_of_service_original_text"`
-	TermsOfServiceParsedText   string `json:"terms_of_service_parsed_text"`
-	PrivacyPolicyOriginalText  string `json:"privacy_policy_original_text"`
-	PrivacyPolicyParsedText    string `json:"privacy_policy_parsed_text"`
-}
-
-type SiteSecurityReq struct {
-	LoginRequired          bool   `json:"login_required"`
-	ExternalContentDisplay string `validate:"required,oneof=always_display ask_before_display" json:"external_content_display"`
-	CheckUpdate            bool   `validate:"omitempty,sanitizer" form:"check_update" json:"check_update"`
-}
-
-type SitePoliciesResp SitePoliciesReq
-type SiteSecurityResp SiteSecurityReq
 
 // GetSiteLegalInfoReq site site legal request
 type GetSiteLegalInfoReq struct {
@@ -221,6 +163,7 @@ type SiteLoginReq struct {
 	AllowNewRegistrations   bool     `json:"allow_new_registrations"`
 	AllowEmailRegistrations bool     `json:"allow_email_registrations"`
 	AllowPasswordLogin      bool     `json:"allow_password_login"`
+	LoginRequired           bool     `json:"login_required"`
 	AllowEmailDomains       []string `json:"allow_email_domains"`
 }
 
@@ -238,7 +181,6 @@ type SiteThemeReq struct {
 	Theme       string         `validate:"required,gt=0,lte=255" json:"theme"`
 	ThemeConfig map[string]any `validate:"omitempty" json:"theme_config"`
 	ColorScheme string         `validate:"omitempty,gt=0,lte=100" json:"color_scheme"`
-	Layout      string         `validate:"omitempty,oneof=Full-width Fixed-width" json:"layout"`
 }
 
 type SiteSeoReq struct {
@@ -249,56 +191,6 @@ type SiteSeoReq struct {
 func (s *SiteSeoResp) IsShortLink() bool {
 	return s.Permalink == constant.PermalinkQuestionIDAndTitleByShortID ||
 		s.Permalink == constant.PermalinkQuestionIDByShortID
-}
-
-// AIPromptConfig AI prompt configuration for different languages
-type AIPromptConfig struct {
-	ZhCN string `json:"zh_cn"`
-	EnUS string `json:"en_us"`
-}
-
-// SiteAIReq AI configuration request
-type SiteAIReq struct {
-	Enabled         bool              `validate:"omitempty" form:"enabled" json:"enabled"`
-	ChosenProvider  string            `validate:"omitempty,lte=50" form:"chosen_provider" json:"chosen_provider"`
-	SiteAIProviders []*SiteAIProvider `validate:"omitempty,dive" form:"ai_providers" json:"ai_providers"`
-	PromptConfig    *AIPromptConfig   `validate:"omitempty" form:"prompt_config" json:"prompt_config,omitempty"`
-}
-
-func (s *SiteAIResp) GetProvider() *SiteAIProvider {
-	if !s.Enabled || s.ChosenProvider == "" {
-		return &SiteAIProvider{}
-	}
-	if len(s.SiteAIProviders) == 0 {
-		return &SiteAIProvider{}
-	}
-	for _, provider := range s.SiteAIProviders {
-		if provider.Provider == s.ChosenProvider {
-			return provider
-		}
-	}
-	return &SiteAIProvider{}
-}
-
-type SiteAIProvider struct {
-	Provider string `validate:"omitempty,lte=50" form:"provider" json:"provider"`
-	APIHost  string `validate:"omitempty,lte=512" form:"api_host" json:"api_host"`
-	APIKey   string `validate:"omitempty,lte=256" form:"api_key" json:"api_key"`
-	Model    string `validate:"omitempty,lte=100" form:"model" json:"model"`
-}
-
-// SiteAIResp AI configuration response
-type SiteAIResp SiteAIReq
-
-type SiteMCPReq struct {
-	Enabled bool `validate:"omitempty" form:"enabled" json:"enabled"`
-}
-
-type SiteMCPResp struct {
-	Enabled    bool   `json:"enabled"`
-	Type       string `json:"type"`
-	URL        string `json:"url"`
-	HTTPHeader string `json:"http_header"`
 }
 
 // SiteGeneralResp site general response
@@ -325,7 +217,6 @@ type SiteThemeResp struct {
 	Theme        string         `json:"theme"`
 	ThemeConfig  map[string]any `json:"theme_config"`
 	ColorScheme  string         `json:"color_scheme"`
-	Layout       string         `json:"layout"`
 }
 
 func (s *SiteThemeResp) TrTheme(ctx context.Context) {
@@ -345,11 +236,10 @@ type ThemeOption struct {
 	Value string `json:"value"`
 }
 
-type SiteQuestionsResp SiteQuestionsReq
-type SiteAdvancedResp SiteAdvancedReq
-type SiteTagsResp SiteTagsReq
+// SiteWriteResp site write response
+type SiteWriteResp SiteWriteReq
 
-// SiteLegalResp site write response use SitePoliciesResp and SiteSecurityResp instead
+// SiteLegalResp site write response
 type SiteLegalResp SiteLegalReq
 
 // SiteLegalSimpleResp site write response
@@ -362,32 +252,25 @@ type SiteSeoResp SiteSeoReq
 
 // SiteInfoResp get site info response
 type SiteInfoResp struct {
-	General       *SiteGeneralResp           `json:"general"`
-	Interface     *SiteInterfaceSettingsResp `json:"interface"`
-	UsersSettings *SiteUsersSettingsResp     `json:"users_settings"`
-	Branding      *SiteBrandingResp          `json:"branding"`
-	Login         *SiteLoginResp             `json:"login"`
-	Theme         *SiteThemeResp             `json:"theme"`
-	CustomCssHtml *SiteCustomCssHTMLResp     `json:"custom_css_html"`
-	SiteSeo       *SiteSeoResp               `json:"site_seo"`
-	SiteUsers     *SiteUsersResp             `json:"site_users"`
-	Advanced      *SiteAdvancedResp          `json:"site_advanced"`
-	Questions     *SiteQuestionsResp         `json:"site_questions"`
-	Tags          *SiteTagsResp              `json:"site_tags"`
-	Legal         *SiteLegalSimpleResp       `json:"site_legal"`
-	Security      *SiteSecurityResp          `json:"site_security"`
-	Version       string                     `json:"version"`
-	Revision      string                     `json:"revision"`
-	AIEnabled     bool                       `json:"ai_enabled"`
-	MCPEnabled    bool                       `json:"mcp_enabled"`
+	General       *SiteGeneralResp       `json:"general"`
+	Interface     *SiteInterfaceResp     `json:"interface"`
+	Branding      *SiteBrandingResp      `json:"branding"`
+	Login         *SiteLoginResp         `json:"login"`
+	Theme         *SiteThemeResp         `json:"theme"`
+	CustomCssHtml *SiteCustomCssHTMLResp `json:"custom_css_html"`
+	SiteSeo       *SiteSeoResp           `json:"site_seo"`
+	SiteUsers     *SiteUsersResp         `json:"site_users"`
+	Write         *SiteWriteResp         `json:"site_write"`
+	Legal         *SiteLegalSimpleResp   `json:"site_legal"`
+	Version       string                 `json:"version"`
+	Revision      string                 `json:"revision"`
 }
-
 type TemplateSiteInfoResp struct {
-	General       *SiteGeneralResp           `json:"general"`
-	Interface     *SiteInterfaceSettingsResp `json:"interface"`
-	Branding      *SiteBrandingResp          `json:"branding"`
-	SiteSeo       *SiteSeoResp               `json:"site_seo"`
-	CustomCssHtml *SiteCustomCssHTMLResp     `json:"custom_css_html"`
+	General       *SiteGeneralResp       `json:"general"`
+	Interface     *SiteInterfaceResp     `json:"interface"`
+	Branding      *SiteBrandingResp      `json:"branding"`
+	SiteSeo       *SiteSeoResp           `json:"site_seo"`
+	CustomCssHtml *SiteCustomCssHTMLResp `json:"custom_css_html"`
 	Title         string
 	Year          string
 	Canonical     string

@@ -28,7 +28,7 @@ import {
 } from '@/common/interface';
 import { interfaceStore, loggedUserInfoStore } from '@/stores';
 import { JSONSchema, SchemaForm, UISchema } from '@/components';
-import { DEFAULT_TIMEZONE } from '@/common/constants';
+import { DEFAULT_TIMEZONE, SYSTEM_AVATAR_OPTIONS } from '@/common/constants';
 import {
   updateInterfaceSetting,
   useInterfaceSetting,
@@ -68,6 +68,20 @@ const Interface: FC = () => {
         description: t('time_zone.text'),
         default: setting?.time_zone || DEFAULT_TIMEZONE,
       },
+      default_avatar: {
+        type: 'string',
+        title: t('avatar.label'),
+        description: t('avatar.text'),
+        enum: SYSTEM_AVATAR_OPTIONS?.map((v) => v.value),
+        enumNames: SYSTEM_AVATAR_OPTIONS?.map((v) => v.label),
+        default: setting?.default_avatar || 'system',
+      },
+      gravatar_base_url: {
+        type: 'string',
+        title: t('gravatar_base_url.label'),
+        description: t('gravatar_base_url.text'),
+        default: setting?.gravatar_base_url || '',
+      },
     },
   };
 
@@ -82,6 +96,16 @@ const Interface: FC = () => {
       isInvalid: false,
       errorMsg: '',
     },
+    default_avatar: {
+      value: setting?.default_avatar || 'system',
+      isInvalid: false,
+      errorMsg: '',
+    },
+    gravatar_base_url: {
+      value: setting?.gravatar_base_url || '',
+      isInvalid: false,
+      errorMsg: '',
+    },
   });
 
   const uiSchema: UISchema = {
@@ -90,6 +114,15 @@ const Interface: FC = () => {
     },
     time_zone: {
       'ui:widget': 'timezone',
+    },
+    default_avatar: {
+      'ui:widget': 'select',
+    },
+    gravatar_base_url: {
+      'ui:widget': 'input',
+      'ui:options': {
+        placeholder: 'https://www.gravatar.com/avatar/',
+      },
     },
   };
   const getLangs = async () => {
@@ -123,6 +156,8 @@ const Interface: FC = () => {
     const reqParams: AdminSettingsInterface = {
       language: formData.language.value,
       time_zone: formData.time_zone.value,
+      default_avatar: formData.default_avatar.value,
+      gravatar_base_url: formData.gravatar_base_url.value,
     };
 
     updateInterfaceSetting(reqParams)
@@ -150,18 +185,20 @@ const Interface: FC = () => {
 
   useEffect(() => {
     if (setting) {
-      const formMeta = { ...formData };
-      if (setting.language) {
-        formMeta.language.value = setting.language;
-      } else {
-        formMeta.language.value = storeInterface.language || langs?.[0]?.value;
-      }
-      if (setting.time_zone) {
-        formMeta.time_zone.value = setting.time_zone;
-      }
+      const formMeta = {};
+      Object.keys(setting).forEach((k) => {
+        let v = setting[k];
+        if (k === 'default_avatar' && !v) {
+          v = 'system';
+        }
+        if (k === 'gravatar_base_url' && !v) {
+          v = '';
+        }
+        formMeta[k] = { ...formData[k], value: v };
+      });
       setFormData({ ...formData, ...formMeta });
     }
-  }, [setting, langs]);
+  }, [setting]);
   useEffect(() => {
     getLangs();
   }, []);
@@ -172,15 +209,13 @@ const Interface: FC = () => {
   return (
     <>
       <h3 className="mb-4">{t('page_title')}</h3>
-      <div className="max-w-748">
-        <SchemaForm
-          schema={schema}
-          uiSchema={uiSchema}
-          formData={formData}
-          onSubmit={onSubmit}
-          onChange={handleOnChange}
-        />
-      </div>
+      <SchemaForm
+        schema={schema}
+        uiSchema={uiSchema}
+        formData={formData}
+        onSubmit={onSubmit}
+        onChange={handleOnChange}
+      />
     </>
   );
 };

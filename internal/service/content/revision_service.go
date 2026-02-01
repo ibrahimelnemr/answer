@@ -32,9 +32,9 @@ import (
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/activity"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	answercommon "github.com/apache/answer/internal/service/answer_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/object_info"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
 	"github.com/apache/answer/internal/service/report_common"
@@ -62,8 +62,8 @@ type RevisionService struct {
 	answerRepo               answercommon.AnswerRepo
 	tagRepo                  tag_common.TagRepo
 	tagCommon                *tag_common.TagCommonService
-	notificationQueueService noticequeue.Service
-	activityQueueService     activityqueue.Service
+	notificationQueueService notice_queue.NotificationQueueService
+	activityQueueService     activity_queue.ActivityQueueService
 	reportRepo               report_common.ReportRepo
 	reviewService            *review.ReviewService
 	reviewActivity           activity.ReviewActivityRepo
@@ -79,8 +79,8 @@ func NewRevisionService(
 	answerRepo answercommon.AnswerRepo,
 	tagRepo tag_common.TagRepo,
 	tagCommon *tag_common.TagCommonService,
-	notificationQueueService noticequeue.Service,
-	activityQueueService activityqueue.Service,
+	notificationQueueService notice_queue.NotificationQueueService,
+	activityQueueService activity_queue.ActivityQueueService,
 	reportRepo report_common.ReportRepo,
 	reviewService *review.ReviewService,
 	reviewActivity activity.ReviewActivityRepo,
@@ -388,23 +388,6 @@ func (rs *RevisionService) GetRevisionList(ctx context.Context, req *schema.GetR
 	)
 
 	resp = []schema.GetRevisionResp{}
-	objInfo, infoErr := rs.objectInfoService.GetInfo(ctx, req.ObjectID)
-	if infoErr != nil {
-		return nil, infoErr
-	}
-	if !req.IsAdmin && objInfo.IsDeleted() && objInfo.ObjectCreatorUserID != req.UserID {
-		switch objInfo.ObjectType {
-		case constant.QuestionObjectType:
-			return nil, errors.NotFound(reason.QuestionNotFound)
-		case constant.AnswerObjectType:
-			return nil, errors.NotFound(reason.AnswerNotFound)
-		case constant.TagObjectType:
-			return nil, errors.NotFound(reason.TagNotFound)
-		default:
-			return nil, errors.NotFound(reason.ObjectNotFound)
-		}
-	}
-
 	_ = copier.Copy(&rev, req)
 
 	revs, err = rs.revisionRepo.GetRevisionList(ctx, &rev)

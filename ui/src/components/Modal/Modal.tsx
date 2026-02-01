@@ -21,8 +21,6 @@ import React, { FC } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
-import classNames from 'classnames';
-
 export interface Props {
   id?: string;
   /** header title */
@@ -79,9 +77,7 @@ const Index: FC<Props> = ({
           {title || t('title', { keyPrefix: 'modal_confirm' })}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className={classNames('text-break', bodyClass)}>
-        {children}
-      </Modal.Body>
+      <Modal.Body className={bodyClass}>{children}</Modal.Body>
       {(showCancel || showConfirm) && (
         <Modal.Footer>
           {showCancel && (

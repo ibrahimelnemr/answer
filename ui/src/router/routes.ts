@@ -358,24 +358,8 @@ const routes: RouteNode[] = [
             page: 'pages/Admin/Dashboard',
           },
           {
-            path: 'qa/questions',
-            page: 'pages/Admin/Questions',
-          },
-          {
-            path: 'qa/answers',
+            path: 'answers',
             page: 'pages/Admin/Answers',
-          },
-          {
-            path: 'qa/settings',
-            page: 'pages/Admin/QaSettings',
-          },
-          {
-            path: 'tags/settings',
-            page: 'pages/Admin/TagsSettings',
-          },
-          {
-            path: 'security',
-            page: 'pages/Admin/Security',
           },
           {
             path: 'themes',
@@ -394,12 +378,12 @@ const routes: RouteNode[] = [
             page: 'pages/Admin/Interface',
           },
           {
-            path: 'users',
-            page: 'pages/Admin/Users',
+            path: 'questions',
+            page: 'pages/Admin/Questions',
           },
           {
-            path: 'users/settings',
-            page: 'pages/Admin/UsersSettings',
+            path: 'users',
+            page: 'pages/Admin/Users',
           },
           {
             path: 'users/:user_id',
@@ -414,12 +398,12 @@ const routes: RouteNode[] = [
             page: 'pages/Admin/Branding',
           },
           {
-            path: 'rules/policies',
-            page: 'pages/Admin/Policies',
+            path: 'legal',
+            page: 'pages/Admin/Legal',
           },
           {
-            path: 'files',
-            page: 'pages/Admin/Files',
+            path: 'write',
+            page: 'pages/Admin/Write',
           },
           {
             path: 'seo',
@@ -430,7 +414,7 @@ const routes: RouteNode[] = [
             page: 'pages/Admin/Login',
           },
           {
-            path: 'rules/privileges',
+            path: 'privileges',
             page: 'pages/Admin/Privileges',
           },
           {
@@ -444,22 +428,6 @@ const routes: RouteNode[] = [
           {
             path: 'badges',
             page: 'pages/Admin/Badges',
-          },
-          {
-            path: 'ai-assistant',
-            page: 'pages/Admin/AiAssistant',
-          },
-          {
-            path: 'ai-settings',
-            page: 'pages/Admin/AiSettings',
-          },
-          {
-            path: 'apikeys',
-            page: 'pages/Admin/Apikeys',
-          },
-          {
-            path: 'mcp',
-            page: 'pages/Admin/Mcp',
           },
         ],
       },
@@ -482,26 +450,6 @@ const routes: RouteNode[] = [
       {
         path: '50x',
         page: 'pages/50X',
-      },
-      // ai
-      {
-        page: 'pages/SideNavLayoutWithoutFooter',
-        children: [
-          {
-            path: '/ai-assistant',
-            page: 'pages/AiAssistant',
-            guard: () => {
-              return guard.logged();
-            },
-          },
-          {
-            path: '/ai-assistant/:id',
-            page: 'pages/AiAssistant',
-            guard: () => {
-              return guard.logged();
-            },
-          },
-        ],
       },
     ],
   },

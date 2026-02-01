@@ -101,12 +101,6 @@ type DashboardService interface {
 
 func (ds *dashboardService) Statistical(ctx context.Context) (*schema.DashboardInfo, error) {
 	dashboardInfo := ds.getFromCache(ctx)
-	security, err := ds.siteInfoService.GetSiteSecurity(ctx)
-	if err != nil {
-		log.Errorf("get general site info failed: %s", err)
-		return dashboardInfo, nil
-	}
-
 	if dashboardInfo == nil {
 		dashboardInfo = &schema.DashboardInfo{}
 		dashboardInfo.AnswerCount = ds.answerCount(ctx)
@@ -114,7 +108,12 @@ func (ds *dashboardService) Statistical(ctx context.Context) (*schema.DashboardI
 		dashboardInfo.UserCount = ds.userCount(ctx)
 		dashboardInfo.VoteCount = ds.voteCount(ctx)
 		dashboardInfo.OccupyingStorageSpace = ds.calculateStorage()
-		if security.CheckUpdate {
+		general, err := ds.siteInfoService.GetSiteGeneral(ctx)
+		if err != nil {
+			log.Errorf("get general site info failed: %s", err)
+			return dashboardInfo, nil
+		}
+		if general.CheckUpdate {
 			dashboardInfo.VersionInfo.RemoteVersion = ds.remoteVersion(ctx)
 		}
 		dashboardInfo.DatabaseVersion = ds.getDatabaseInfo()
@@ -142,7 +141,9 @@ func (ds *dashboardService) Statistical(ctx context.Context) (*schema.DashboardI
 	dashboardInfo.VersionInfo.Version = constant.Version
 	dashboardInfo.VersionInfo.Revision = constant.Revision
 	dashboardInfo.GoVersion = constant.GoVersion
-	dashboardInfo.LoginRequired = security.LoginRequired
+	if siteLogin, err := ds.siteInfoService.GetSiteLogin(ctx); err == nil {
+		dashboardInfo.LoginRequired = siteLogin.LoginRequired
+	}
 
 	ds.setCache(ctx, dashboardInfo)
 	return dashboardInfo, nil

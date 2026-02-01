@@ -23,10 +23,8 @@ import (
 	"github.com/apache/answer/internal/service/action"
 	"github.com/apache/answer/internal/service/activity"
 	"github.com/apache/answer/internal/service/activity_common"
-	"github.com/apache/answer/internal/service/activityqueue"
-	"github.com/apache/answer/internal/service/ai_conversation"
+	"github.com/apache/answer/internal/service/activity_queue"
 	answercommon "github.com/apache/answer/internal/service/answer_common"
-	"github.com/apache/answer/internal/service/apikey"
 	"github.com/apache/answer/internal/service/auth"
 	"github.com/apache/answer/internal/service/badge"
 	"github.com/apache/answer/internal/service/collection"
@@ -36,15 +34,14 @@ import (
 	"github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/content"
 	"github.com/apache/answer/internal/service/dashboard"
-	"github.com/apache/answer/internal/service/eventqueue"
+	"github.com/apache/answer/internal/service/event_queue"
 	"github.com/apache/answer/internal/service/export"
-	"github.com/apache/answer/internal/service/feature_toggle"
 	"github.com/apache/answer/internal/service/file_record"
 	"github.com/apache/answer/internal/service/follow"
 	"github.com/apache/answer/internal/service/importer"
 	"github.com/apache/answer/internal/service/meta"
 	metacommon "github.com/apache/answer/internal/service/meta_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/notification"
 	notficationcommon "github.com/apache/answer/internal/service/notification_common"
 	"github.com/apache/answer/internal/service/object_info"
@@ -117,21 +114,18 @@ var ProviderSetService = wire.NewSet(
 	user_external_login.NewUserCenterLoginService,
 	plugin_common.NewPluginCommonService,
 	config.NewConfigService,
-	noticequeue.NewService,
-	activityqueue.NewService,
+	notice_queue.NewNotificationQueueService,
+	activity_queue.NewActivityQueueService,
 	user_notification_config.NewUserNotificationConfigService,
 	notification.NewExternalNotificationService,
-	noticequeue.NewExternalService,
+	notice_queue.NewNewQuestionNotificationQueueService,
 	review.NewReviewService,
 	meta.NewMetaService,
-	eventqueue.NewService,
+	event_queue.NewEventQueueService,
 	badge.NewBadgeService,
 	badge.NewBadgeEventService,
 	badge.NewBadgeAwardService,
 	badge.NewBadgeGroupService,
 	importer.NewImporterService,
 	file_record.NewFileRecordService,
-	apikey.NewAPIKeyService,
-	ai_conversation.NewAIConversationService,
-	feature_toggle.NewFeatureToggleService,
 )

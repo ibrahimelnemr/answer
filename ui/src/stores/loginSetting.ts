@@ -29,6 +29,7 @@ interface IType {
 const loginSetting = create<IType>((set) => ({
   login: {
     allow_new_registrations: true,
+    login_required: false,
     allow_email_registrations: true,
     allow_email_domains: [],
     allow_password_login: true,

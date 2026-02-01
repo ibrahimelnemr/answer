@@ -17,28 +17,26 @@
  * under the License.
  */
 
-import { useEffect, useState, memo, useContext } from 'react';
+import { useEffect, useState, memo } from 'react';
 import { Button, Form, Modal, Tab, Tabs } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
+import { Modal as AnswerModal } from '@/components';
 import ToolItem from '../toolItem';
-import { EditorContext } from '../EditorContext';
-import { Editor } from '../types';
-import { useImageUpload } from '../hooks/useImageUpload';
+import { IEditorContext, Editor } from '../types';
+import { uploadImage } from '@/services';
+import { writeSettingStore } from '@/stores';
 
-const Image = () => {
-  const editor = useContext(EditorContext);
-  const [editorState, setEditorState] = useState<Editor | null>(editor);
-
-  // Update editor state when editor context changes
-  // This ensures event listeners are re-bound when switching editor modes
-  useEffect(() => {
-    if (editor) {
-      setEditorState(editor);
-    }
-  }, [editor]);
+let context: IEditorContext;
+const Image = ({ editorInstance }) => {
+  const [editor, setEditor] = useState<Editor>(editorInstance);
   const { t } = useTranslation('translation', { keyPrefix: 'editor' });
-  const { verifyImageSize, uploadFiles } = useImageUpload();
+  const {
+    max_image_size = 4,
+    max_attachment_size = 8,
+    authorized_image_extensions = [],
+    authorized_attachment_extensions = [],
+  } = writeSettingStore((state) => state.write);
 
   const loadingText = `![${t('image.uploading')}...]()`;
 
@@ -62,6 +60,89 @@ const Image = () => {
     errorMsg: '',
   });
 
+  const verifyImageSize = (files: FileList) => {
+    if (files.length === 0) {
+      return false;
+    }
+
+    /**
+     * When allowing attachments to be uploaded, verification logic for attachment information has been added. In order to avoid abnormal judgment caused by the order of drag and drop upload, the drag and drop upload verification of attachments and the drag and drop upload of images are put together.
+     *
+     */
+    const canUploadAttachment = authorized_attachment_extensions.length > 0;
+    const allowedAllType = [
+      ...authorized_image_extensions,
+      ...authorized_attachment_extensions,
+    ];
+    const unSupportFiles = Array.from(files).filter((file) => {
+      const fileName = file.name.toLowerCase();
+      return canUploadAttachment
+        ? !allowedAllType.find((v) => fileName.endsWith(v))
+        : file.type.indexOf('image') === -1;
+    });
+
+    if (unSupportFiles.length > 0) {
+      AnswerModal.confirm({
+        content: canUploadAttachment
+          ? t('file.not_supported', { file_type: allowedAllType.join(', ') })
+          : t('image.form_image.fields.file.msg.only_image'),
+        showCancel: false,
+      });
+      return false;
+    }
+
+    const otherFiles = Array.from(files).filter((file) => {
+      return file.type.indexOf('image') === -1;
+    });
+
+    if (canUploadAttachment && otherFiles.length > 0) {
+      const attachmentOverSizeFiles = otherFiles.filter(
+        (file) => file.size / 1024 / 1024 > max_attachment_size,
+      );
+      if (attachmentOverSizeFiles.length > 0) {
+        AnswerModal.confirm({
+          content: t('file.max_size', { size: max_attachment_size }),
+          showCancel: false,
+        });
+        return false;
+      }
+    }
+
+    const imageFiles = Array.from(files).filter(
+      (file) => file.type.indexOf('image') > -1,
+    );
+    const oversizedImages = imageFiles.filter(
+      (file) => file.size / 1024 / 1024 > max_image_size,
+    );
+    if (oversizedImages.length > 0) {
+      AnswerModal.confirm({
+        content: t('image.form_image.fields.file.msg.max_size', {
+          size: max_image_size,
+        }),
+        showCancel: false,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const upload = (
+    files: FileList,
+  ): Promise<{ url: string; name: string; type: string }[]> => {
+    const promises = Array.from(files).map(async (file) => {
+      const type = file.type.indexOf('image') > -1 ? 'post' : 'post_attachment';
+      const url = await uploadImage({ file, type });
+
+      return {
+        name: file.name,
+        url,
+        type,
+      };
+    });
+
+    return Promise.all(promises);
+  };
   function dragenter(e) {
     e.stopPropagation();
     e.preventDefault();
@@ -79,22 +160,19 @@ const Image = () => {
       return;
     }
 
-    if (!editorState) {
-      return;
-    }
-    const startPos = editorState.getCursor();
+    const startPos = editor.getCursor();
 
     const endPos = { ...startPos, ch: startPos.ch + loadingText.length };
 
-    editorState.replaceSelection(loadingText);
-    editorState.setReadOnly(true);
-    const urls = await uploadFiles(fileList)
+    editor.replaceSelection(loadingText);
+    editor.setReadOnly(true);
+    const urls = await upload(fileList)
       .catch(() => {
-        editorState.replaceRange('', startPos, endPos);
+        editor.replaceRange('', startPos, endPos);
       })
       .finally(() => {
-        editorState?.setReadOnly(false);
-        editorState?.focus();
+        editor.setReadOnly(false);
+        editor.focus();
       });
 
     const text: string[] = [];
@@ -106,9 +184,9 @@ const Image = () => {
       });
     }
     if (text.length) {
-      editorState.replaceRange(text.join('\n'), startPos, endPos);
+      editor.replaceRange(text.join('\n'), startPos, endPos);
     } else {
-      editorState?.replaceRange('', startPos, endPos);
+      editor.replaceRange('', startPos, endPos);
     }
   };
 
@@ -119,28 +197,25 @@ const Image = () => {
 
     if (bool) {
       event.preventDefault();
-      if (!editorState) {
-        return;
-      }
-      const startPos = editorState.getCursor();
+      const startPos = editor.getCursor();
       const endPos = { ...startPos, ch: startPos.ch + loadingText.length };
 
-      editorState?.replaceSelection(loadingText);
-      editorState?.setReadOnly(true);
-      uploadFiles(clipboard.files)
+      editor.replaceSelection(loadingText);
+      editor.setReadOnly(true);
+      upload(clipboard.files)
         .then((urls) => {
           const text = urls.map(({ name, url, type }) => {
             return `${type === 'post' ? '!' : ''}[${name}](${url})`;
           });
 
-          editorState.replaceRange(text.join('\n'), startPos, endPos);
+          editor.replaceRange(text.join('\n'), startPos, endPos);
         })
         .catch(() => {
-          editorState.replaceRange('', startPos, endPos);
+          editor.replaceRange('', startPos, endPos);
         })
         .finally(() => {
-          editorState?.setReadOnly(false);
-          editorState?.focus();
+          editor.setReadOnly(false);
+          editor.focus();
         });
 
       return;
@@ -214,9 +289,7 @@ const Image = () => {
       return match.length > 1 ? '\n\n' : match;
     });
 
-    if (editorState) {
-      editorState.replaceSelection(markdownText);
-    }
+    editor.replaceSelection(markdownText);
   };
   const handleClick = () => {
     if (!link.value) {
@@ -225,33 +298,28 @@ const Image = () => {
     }
     setLink({ ...link, type: '' });
 
-    if (editorState) {
-      editorState.insertImage(link.value, imageName.value || undefined);
-    }
+    const text = `![${imageName.value}](${link.value})`;
+
+    editor.replaceSelection(text);
 
     setVisible(false);
 
-    editorState?.focus();
+    editor.focus();
     setLink({ ...link, value: '' });
     setImageName({ ...imageName, value: '' });
   };
   useEffect(() => {
-    if (!editorState) {
-      return undefined;
-    }
-
-    editorState.on('dragenter', dragenter);
-    editorState.on('dragover', dragover);
-    editorState.on('drop', drop);
-    editorState.on('paste', paste);
-
+    editor?.on('dragenter', dragenter);
+    editor?.on('dragover', dragover);
+    editor?.on('drop', drop);
+    editor?.on('paste', paste);
     return () => {
-      editorState.off('dragenter', dragenter);
-      editorState.off('dragover', dragover);
-      editorState.off('drop', drop);
-      editorState.off('paste', paste);
+      editor?.off('dragenter', dragenter);
+      editor?.off('dragover', dragover);
+      editor?.off('drop', drop);
+      editor?.off('paste', paste);
     };
-  }, [editorState]);
+  }, [editor]);
 
   useEffect(() => {
     if (link.value && link.type === 'drop') {
@@ -259,16 +327,15 @@ const Image = () => {
     }
   }, [link.value]);
 
-  const addLink = (editorInstance: Editor) => {
-    setEditorState(editorInstance);
-    const text = editorInstance?.getSelection();
+  const addLink = (ctx) => {
+    context = ctx;
+    setEditor(context.editor);
+    const text = context.editor?.getSelection();
 
     setImageName({ ...imageName, value: text });
 
     setVisible(true);
   };
-
-  const { uploadSingleFile } = useImageUpload();
 
   const onUpload = async (e) => {
     if (!editor) {
@@ -281,7 +348,7 @@ const Image = () => {
       return;
     }
 
-    uploadSingleFile(e.target.files[0]).then((url) => {
+    uploadImage({ file: e.target.files[0], type: 'post' }).then((url) => {
       setLink({ ...link, value: url });
       setImageName({ ...imageName, value: files[0].name });
     });

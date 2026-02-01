@@ -23,7 +23,6 @@ import (
 	"html/template"
 	"io/fs"
 	"os"
-	"strings"
 
 	brotli "github.com/anargu/gin-brotli"
 	"github.com/apache/answer/internal/base/middleware"
@@ -52,12 +51,7 @@ func NewHTTPServer(debug bool,
 		gin.SetMode(gin.ReleaseMode)
 	}
 	r := gin.New()
-	r.Use(func(ctx *gin.Context) {
-		if strings.Contains(ctx.Request.URL.Path, "/chat/completions") {
-			return
-		}
-		brotli.Brotli(brotli.DefaultCompression)(ctx)
-	}, middleware.ExtractAndSetAcceptLanguage, shortIDMiddleware.SetShortIDFlag())
+	r.Use(brotli.Brotli(brotli.DefaultCompression), middleware.ExtractAndSetAcceptLanguage, shortIDMiddleware.SetShortIDFlag())
 	r.GET("/healthz", func(ctx *gin.Context) { ctx.String(200, "OK") })
 
 	templatePath := os.Getenv("ANSWER_TEMPLATE_PATH")
@@ -113,10 +107,5 @@ func NewHTTPServer(debug bool,
 		agent.RegisterAuthAdminRouter(adminauthV1)
 		return nil
 	})
-
-	// mcp
-	mcpAPIGroup := r.Group(uiConf.APIBaseURL + "/answer/api/v1")
-	mcpAPIGroup.Use(authUserMiddleware.AuthMcpEnable(), authUserMiddleware.AuthAPIKey())
-	answerRouter.RegisterMCPRouter(mcpAPIGroup)
 	return r
 }

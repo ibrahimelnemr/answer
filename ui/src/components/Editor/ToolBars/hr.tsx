@@ -21,8 +21,9 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ToolItem from '../toolItem';
-import { Editor } from '../types';
+import { IEditorContext } from '../types';
 
+let context: IEditorContext;
 const Hr = () => {
   const { t } = useTranslation('translation', { keyPrefix: 'editor' });
   const item = {
@@ -30,9 +31,11 @@ const Hr = () => {
     keyMap: ['Ctrl-r'],
     tip: `${t('hr.text')} (Ctrl+r)`,
   };
-  const handleClick = (editor: Editor) => {
-    editor.insertHorizontalRule();
-    editor.focus();
+  const handleClick = (ctx) => {
+    context = ctx;
+    const { appendBlock, editor } = context;
+    appendBlock('----------\n');
+    editor?.focus();
   };
 
   return <ToolItem {...item} onClick={handleClick} />;

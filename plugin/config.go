@@ -65,13 +65,13 @@ type ConfigField struct {
 }
 
 type ConfigFieldUIOptions struct {
-	Placeholder    Translator      `json:"placeholder"`
+	Placeholder    Translator      `json:"placeholder,omitempty"`
 	Rows           string          `json:"rows,omitempty"`
 	InputType      InputType       `json:"input_type,omitempty"`
-	Label          Translator      `json:"label"`
+	Label          Translator      `json:"label,omitempty"`
 	Action         *UIOptionAction `json:"action,omitempty"`
 	Variant        string          `json:"variant,omitempty"`
-	Text           Translator      `json:"text"`
+	Text           Translator      `json:"text,omitempty"`
 	ClassName      string          `json:"class_name,omitempty"`
 	FieldClassName string          `json:"field_class_name,omitempty"`
 }

@@ -23,6 +23,5 @@ import Tips from './Tips';
 import Empty from './Empty';
 import SearchHead from './SearchHead';
 import ListLoader from './ListLoader';
-import AiCard from './AiCard';
 
-export { Head, SearchItem, Tips, Empty, SearchHead, ListLoader, AiCard };
+export { Head, SearchItem, Tips, Empty, SearchHead, ListLoader };

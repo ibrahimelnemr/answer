@@ -44,7 +44,7 @@ export interface JSONSchema {
   required?: string[];
   properties: {
     [key: string]: {
-      type?: 'string' | 'boolean' | 'number' | Type.Tag[];
+      type?: 'string' | 'boolean' | 'number';
       title: string;
       description?: string;
       enum?: Array<string | boolean | number>;

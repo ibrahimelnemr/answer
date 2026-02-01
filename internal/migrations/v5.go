@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/apache/answer/internal/base/constant"
 	"github.com/apache/answer/internal/entity"
 	"xorm.io/xorm"
 )
@@ -51,7 +50,7 @@ func addThemeAndPrivateMode(ctx context.Context, x *xorm.Engine) error {
 		}
 	}
 
-	themeConfig := fmt.Sprintf(`{"theme":"default","theme_config":{"default":{"navbar_style":"#0033ff","primary_color":"#0033ff"}},"layout":"%s"}`, constant.ThemeLayoutFullWidth)
+	themeConfig := `{"theme":"default","theme_config":{"default":{"navbar_style":"#0033ff","primary_color":"#0033ff"}}}`
 	themeSiteInfo := &entity.SiteInfo{
 		Type:    "theme",
 		Content: themeConfig,
