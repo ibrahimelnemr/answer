@@ -268,6 +268,10 @@ backend:
         other: You cannot set the synonym of the current tag as itself.
       minimum_count:
         other: Not enough tags were entered.
+      only_one:
+        other: Exactly one tag is required.
+      slug_hierarchy_invalid:
+        other: Tag slug must be in the form level1.level2.level3.
     smtp:
       config_from_name_cannot_be_email:
         other: The from name cannot be a email address.
@@ -1027,11 +1031,12 @@ ui:
             range: Display name up to 35 characters.
         slug_name:
           label: URL slug
-          desc: URL slug up to 35 characters.
+          desc: URL slug up to 128 characters. Must be in the form level1.level2.level3.
           msg:
             empty: URL slug cannot be empty.
-            range: URL slug up to 35 characters.
+            range: URL slug up to 128 characters.
             character: URL slug contains unallowed character set.
+            hierarchy: URL slug must be in the form level1.level2.level3.
         desc:
           label: Description
         revision:
@@ -1623,6 +1628,7 @@ ui:
     answers: Answers
     newest: Newest
     active: Active
+    tag: Tag
     hot: Hot
     frequent: Frequent
     recommend: Recommend

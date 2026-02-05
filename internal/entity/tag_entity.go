@@ -37,8 +37,8 @@ type Tag struct {
 	CreatedAt       time.Time `xorm:"created TIMESTAMP created_at"`
 	UpdatedAt       time.Time `xorm:"updated TIMESTAMP updated_at"`
 	MainTagID       int64     `xorm:"not null default 0 BIGINT(20) main_tag_id"`
-	MainTagSlugName string    `xorm:"not null default '' VARCHAR(35) main_tag_slug_name"`
-	SlugName        string    `xorm:"not null default '' unique VARCHAR(35) slug_name"`
+	MainTagSlugName string    `xorm:"not null default '' VARCHAR(128) main_tag_slug_name"`
+	SlugName        string    `xorm:"not null default '' unique VARCHAR(128) slug_name"`
 	DisplayName     string    `xorm:"not null default '' VARCHAR(35) display_name"`
 	OriginalText    string    `xorm:"not null MEDIUMTEXT original_text"`
 	ParsedText      string    `xorm:"not null MEDIUMTEXT parsed_text"`

@@ -30,7 +30,10 @@ import { loggedUserInfoStore } from '@/stores';
 import type * as Type from '@/common/interface';
 import { createTag } from '@/services';
 import { handleFormError, scrollToElementTop } from '@/utils';
-import { TAG_SLUG_NAME_MAX_LENGTH } from '@/common/constants';
+import {
+  TAG_DISPLAY_NAME_MAX_LENGTH,
+  TAG_SLUG_NAME_MAX_LENGTH,
+} from '@/common/constants';
 
 interface FormDataItem {
   displayName: Type.FormValue<string>;
@@ -106,6 +109,13 @@ const Index = () => {
     });
 
   const checkValidated = (): boolean => {
+    const normalizeSlug = (value: string) =>
+      value.trim().toLowerCase().replace(/\s+/g, '-');
+    const isHierarchicalSlug = (value: string) =>
+      /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(
+        value,
+      );
+
     let bol = true;
     let errObjKey = '';
     const { displayName, slugName } = formData;
@@ -118,7 +128,7 @@ const Index = () => {
         isInvalid: true,
         errorMsg: t('form.fields.display_name.msg.empty'),
       };
-    } else if (displayName.value.length > TAG_SLUG_NAME_MAX_LENGTH) {
+    } else if (displayName.value.length > TAG_DISPLAY_NAME_MAX_LENGTH) {
       bol = false;
       errObjKey = 'display_name';
       formData.displayName = {
@@ -149,6 +159,14 @@ const Index = () => {
         value: slugName.value,
         isInvalid: true,
         errorMsg: t('form.fields.slug_name.msg.range'),
+      };
+    } else if (!isHierarchicalSlug(normalizeSlug(slugName.value))) {
+      bol = false;
+      errObjKey = 'slug_name';
+      formData.slugName = {
+        value: slugName.value,
+        isInvalid: true,
+        errorMsg: t('form.fields.slug_name.msg.hierarchy'),
       };
     } else {
       formData.slugName = {
@@ -181,7 +199,10 @@ const Index = () => {
 
     const params = {
       display_name: formData.displayName.value,
-      slug_name: formData.slugName.value,
+      slug_name: formData.slugName.value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-'),
       original_text: formData.description.value,
     };
     createTag(params)

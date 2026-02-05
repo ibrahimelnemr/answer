@@ -513,7 +513,7 @@ const Ask = () => {
                 value={formData.tags.value}
                 onChange={handleTagsChange}
                 showRequiredTag
-                maxTagLength={5}
+                maxTagLength={1}
                 isInvalid={formData.tags.isInvalid}
                 errMsg={formData.tags.errorMsg}
               />

@@ -5,7 +5,7 @@
   "homepage": "/",
   "scripts": {
     "start": "react-app-rewired start",
-    "build": "node ./scripts/env.js && react-app-rewired build",
+    "build": "node ./scripts/env.js && CI=false react-app-rewired build",
     "pre-install": "node ./scripts/importPlugins.js && pnpm install && node ./scripts/preinstall.js ",
     "prepare": "pnpm build:packages",
     "build:packages": "pnpm -r --filter=./src/plugins/* run build",

@@ -299,6 +299,7 @@ export type QuestionOrderBy =
   | 'recommend'
   | 'newest'
   | 'active'
+  | 'tag'
   | 'hot'
   | 'score'
   | 'unanswered'

@@ -23,6 +23,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -33,13 +34,25 @@ import (
 	"github.com/apache/answer/internal/base/validator"
 	"github.com/apache/answer/internal/entity"
 	"github.com/apache/answer/internal/schema"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	"github.com/apache/answer/internal/service/revision_common"
 	"github.com/apache/answer/internal/service/siteinfo_common"
 	"github.com/apache/answer/pkg/converter"
 	"github.com/segmentfault/pacman/errors"
 	"github.com/segmentfault/pacman/log"
 )
+
+var hierarchicalTagSlugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$`)
+
+func normalizeTagSlugName(slug string) string {
+	slug = strings.ReplaceAll(slug, " ", "-")
+	slug = strings.ToLower(slug)
+	return slug
+}
+
+func isHierarchicalTagSlugName(slug string) bool {
+	return hierarchicalTagSlugPattern.MatchString(slug)
+}
 
 type TagCommonRepo interface {
 	AddTagList(ctx context.Context, tagList []*entity.Tag) (err error)
@@ -89,7 +102,7 @@ type TagCommonService struct {
 	tagRelRepo           TagRelRepo
 	tagRepo              TagRepo
 	siteInfoService      siteinfo_common.SiteInfoCommonService
-	activityQueueService activityqueue.Service
+	activityQueueService activity_queue.ActivityQueueService
 }
 
 // NewTagCommonService new tag service
@@ -99,7 +112,7 @@ func NewTagCommonService(
 	tagRepo TagRepo,
 	revisionService *revision_common.RevisionService,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
-	activityQueueService activityqueue.Service,
+	activityQueueService activity_queue.ActivityQueueService,
 ) *TagCommonService {
 	return &TagCommonService{
 		tagCommonRepo:        tagCommonRepo,
@@ -270,11 +283,11 @@ func (ts *TagCommonService) GetTagListByNames(ctx context.Context, tagNames []st
 }
 
 func (ts *TagCommonService) ExistRecommend(ctx context.Context, tags []*schema.TagItem) (bool, error) {
-	taginfo, err := ts.siteInfoService.GetSiteTag(ctx)
+	siteWrite, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		return false, err
 	}
-	if !taginfo.RequiredTag || len(taginfo.RecommendTags) == 0 {
+	if !siteWrite.RequiredTag || len(siteWrite.RecommendTags) == 0 {
 		return true, nil
 	}
 	tagNames := make([]string, 0)
@@ -295,11 +308,11 @@ func (ts *TagCommonService) ExistRecommend(ctx context.Context, tags []*schema.T
 }
 
 func (ts *TagCommonService) GetMinimumTags(ctx context.Context) (int, error) {
-	siteInfo, err := ts.siteInfoService.GetSiteQuestion(ctx)
+	siteWrite, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		return 1, err
 	}
-	minimumTags := siteInfo.MinimumTags
+	minimumTags := siteWrite.MinimumTags
 	return minimumTags, nil
 }
 
@@ -347,8 +360,10 @@ func (ts *TagCommonService) AddTag(ctx context.Context, req *schema.AddTagReq) (
 	if exist {
 		return nil, errors.BadRequest(reason.TagAlreadyExist)
 	}
-	slugName := strings.ReplaceAll(req.SlugName, " ", "-")
-	slugName = strings.ToLower(slugName)
+	slugName := normalizeTagSlugName(req.SlugName)
+	if !isHierarchicalTagSlugName(slugName) {
+		return nil, errors.BadRequest(reason.TagSlugHierarchyInvalid)
+	}
 	tagInfo := &entity.Tag{
 		SlugName:     slugName,
 		DisplayName:  req.DisplayName,
@@ -469,12 +484,12 @@ func (ts *TagCommonService) TagsFormatRecommendAndReserved(ctx context.Context, 
 	if len(tagList) == 0 {
 		return
 	}
-	tagConfig, err := ts.siteInfoService.GetSiteTag(ctx)
+	siteWrite, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	if !tagConfig.RequiredTag {
+	if !siteWrite.RequiredTag {
 		for _, tag := range tagList {
 			tag.Recommend = false
 		}
@@ -485,12 +500,12 @@ func (ts *TagCommonService) tagFormatRecommendAndReserved(ctx context.Context, t
 	if tag == nil {
 		return
 	}
-	tagConfig, err := ts.siteInfoService.GetSiteTag(ctx)
+	siteWrite, err := ts.siteInfoService.GetSiteWrite(ctx)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	if !tagConfig.RequiredTag {
+	if !siteWrite.RequiredTag {
 		tag.Recommend = false
 	}
 }
@@ -674,7 +689,16 @@ func (ts *TagCommonService) ObjectChangeTag(ctx context.Context, objectTagData *
 	thisObjTagNameList := make([]string, 0)
 	thisObjTagIDList := make([]string, 0)
 	for _, t := range objectTagData.Tags {
-		t.SlugName = strings.ToLower(t.SlugName)
+		t.SlugName = normalizeTagSlugName(t.SlugName)
+		if !isHierarchicalTagSlugName(t.SlugName) {
+			errorlist := make([]*validator.FormErrorField, 0)
+			errorlist = append(errorlist, &validator.FormErrorField{
+				ErrorField: "tags",
+				ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagSlugHierarchyInvalid),
+			})
+			err = errors.BadRequest(reason.TagSlugHierarchyInvalid)
+			return errorlist, err
+		}
 		thisObjTagNameList = append(thisObjTagNameList, t.SlugName)
 	}
 
@@ -697,7 +721,7 @@ func (ts *TagCommonService) ObjectChangeTag(ctx context.Context, objectTagData *
 			continue
 		}
 		item := &entity.Tag{}
-		item.SlugName = strings.ReplaceAll(tag.SlugName, " ", "-")
+		item.SlugName = normalizeTagSlugName(tag.SlugName)
 		item.DisplayName = tag.DisplayName
 		item.OriginalText = tag.OriginalText
 		item.ParsedText = tag.ParsedText
@@ -883,8 +907,10 @@ func (ts *TagCommonService) UpdateTag(ctx context.Context, req *schema.UpdateTag
 	}
 
 	// Adding equivalent slug formatting for tag update
-	slugName := strings.ReplaceAll(req.SlugName, " ", "-")
-	slugName = strings.ToLower(slugName)
+	slugName := normalizeTagSlugName(req.SlugName)
+	if len(req.SlugName) > 0 && !isHierarchicalTagSlugName(slugName) {
+		return errors.BadRequest(reason.TagSlugHierarchyInvalid)
+	}
 
 	// If the content is the same, ignore it
 	if tagInfo.OriginalText == req.OriginalText &&

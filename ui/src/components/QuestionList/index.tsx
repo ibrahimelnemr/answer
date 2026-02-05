@@ -41,6 +41,7 @@ import Storage from '@/utils/storage';
 import { LIST_VIEW_STORAGE_KEY } from '@/common/constants';
 
 export const QUESTION_ORDER_KEYS: Type.QuestionOrderBy[] = [
+  'tag',
   'newest',
   'active',
   'unanswered',

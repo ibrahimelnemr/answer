@@ -23,7 +23,10 @@ import { useTranslation } from 'react-i18next';
 
 import ReactDOM from 'react-dom/client';
 
-import { TAG_SLUG_NAME_MAX_LENGTH } from '@/common/constants';
+import {
+  TAG_DISPLAY_NAME_MAX_LENGTH,
+  TAG_SLUG_NAME_MAX_LENGTH,
+} from '@/common/constants';
 
 const div = document.createElement('div');
 const root = ReactDOM.createRoot(div);
@@ -77,6 +80,13 @@ const useTagModal = (props: IProps = {}) => {
   };
 
   const checkValidated = (): boolean => {
+    const normalizeSlug = (value: string) =>
+      value.trim().toLowerCase().replace(/\s+/g, '-');
+    const isHierarchicalSlug = (value: string) =>
+      /^[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*\.[a-z0-9]+(?:-[a-z0-9]+)*$/.test(
+        value,
+      );
+
     let bol = true;
     const { displayName, slugName } = formData;
     if (!displayName.value) {
@@ -86,7 +96,7 @@ const useTagModal = (props: IProps = {}) => {
         isInvalid: true,
         errorMsg: t('form.fields.display_name.msg.empty'),
       };
-    } else if (displayName.value.length > TAG_SLUG_NAME_MAX_LENGTH) {
+    } else if (displayName.value.length > TAG_DISPLAY_NAME_MAX_LENGTH) {
       bol = false;
       formData.displayName = {
         value: displayName.value,
@@ -114,6 +124,13 @@ const useTagModal = (props: IProps = {}) => {
         value: slugName.value,
         isInvalid: true,
         errorMsg: t('form.fields.slug_name.msg.range'),
+      };
+    } else if (!isHierarchicalSlug(normalizeSlug(slugName.value))) {
+      bol = false;
+      formData.slugName = {
+        value: slugName.value,
+        isInvalid: true,
+        errorMsg: t('form.fields.slug_name.msg.hierarchy'),
       };
       // } else if (/[^a-z0-9+#\-.]/.test(slugName.value)) {
       //   bol = false;
@@ -146,7 +163,10 @@ const useTagModal = (props: IProps = {}) => {
 
     if (onConfirm instanceof Function) {
       onConfirm({
-        slug_name: formData.slugName.value,
+        slug_name: formData.slugName.value
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '-'),
         display_name: formData.displayName.value,
         original_text: formData.description.value,
       });

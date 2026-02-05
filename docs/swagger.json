@@ -4462,6 +4462,7 @@
                             "hot",
                             "score",
                             "unanswered",
+                            "tag",
                             "recommend",
                             "frequent"
                         ],
@@ -7878,7 +7879,7 @@
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 }
             }
         },
@@ -9953,6 +9954,7 @@
                         "hot",
                         "score",
                         "unanswered",
+                        "tag",
                         "recommend",
                         "frequent"
                     ]
@@ -11124,7 +11126,7 @@
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 }
             }
         },
@@ -11509,7 +11511,7 @@
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 },
                 "tag_id": {
                     "description": "tag_id",

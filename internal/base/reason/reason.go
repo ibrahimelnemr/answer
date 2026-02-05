@@ -79,6 +79,8 @@ const (
 	TagIsUsedCannotDelete            = "error.tag.is_used_cannot_delete"
 	TagAlreadyExist                  = "error.tag.already_exist"
 	TagMinCount                      = "error.tag.minimum_count"
+	TagOnlyOne                       = "error.tag.only_one"
+	TagSlugHierarchyInvalid          = "error.tag.slug_hierarchy_invalid"
 	RankFailToMeetTheCondition       = "error.rank.fail_to_meet_the_condition"
 	VoteRankFailToMeetTheCondition   = "error.rank.vote_fail_to_meet_the_condition"
 	NoEnoughRankToOperate            = "error.rank.no_enough_rank_to_operate"

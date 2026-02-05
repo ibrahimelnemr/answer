@@ -44,7 +44,7 @@ type GetTagInfoReq struct {
 	// tag id
 	ID string `validate:"omitempty" form:"id"`
 	// tag slug name
-	Name       string `validate:"omitempty,gt=0,lte=35" form:"name"`
+	Name       string `validate:"omitempty,gt=0,lte=128" form:"name"`
 	UserID     string `json:"-"`
 	CanEdit    bool   `json:"-"`
 	CanDelete  bool   `json:"-"`
@@ -147,7 +147,7 @@ type TagChange struct {
 
 type TagItem struct {
 	// slug_name
-	SlugName string `validate:"omitempty,gt=0,lte=35" json:"slug_name"`
+	SlugName string `validate:"omitempty,gt=0,lte=128" json:"slug_name"`
 	// display_name
 	DisplayName string `validate:"omitempty,gt=0,lte=35" json:"display_name"`
 	// original text
@@ -167,7 +167,7 @@ type RemoveTagReq struct {
 // AddTagReq add tag request
 type AddTagReq struct {
 	// slug_name
-	SlugName string `validate:"required,gt=0,lte=35" json:"slug_name"`
+	SlugName string `validate:"required,gt=0,lte=128" json:"slug_name"`
 	// display_name
 	DisplayName string `validate:"required,gt=0,lte=35" json:"display_name"`
 	// original text
@@ -194,7 +194,7 @@ type UpdateTagReq struct {
 	// tag_id
 	TagID string `validate:"required" json:"tag_id"`
 	// slug_name
-	SlugName string `validate:"omitempty,gt=0,lte=35" json:"slug_name"`
+	SlugName string `validate:"omitempty,gt=0,lte=128" json:"slug_name"`
 	// display_name
 	DisplayName string `validate:"omitempty,gt=0,lte=35" json:"display_name"`
 	// original text
@@ -231,7 +231,7 @@ type GetTagWithPageReq struct {
 	// page size
 	PageSize int `validate:"omitempty,min=1" form:"page_size"`
 	// slug_name
-	SlugName string `validate:"omitempty,gt=0,lte=35" form:"slug_name"`
+	SlugName string `validate:"omitempty,gt=0,lte=128" form:"slug_name"`
 	// display_name
 	DisplayName string `validate:"omitempty,gt=0,lte=35" form:"display_name"`
 	// query condition

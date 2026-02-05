@@ -4470,6 +4470,7 @@ const docTemplate = `{
                             "hot",
                             "score",
                             "unanswered",
+                            "tag",
                             "recommend",
                             "frequent"
                         ],
@@ -7886,7 +7887,7 @@ const docTemplate = `{
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 }
             }
         },
@@ -9961,6 +9962,7 @@ const docTemplate = `{
                         "hot",
                         "score",
                         "unanswered",
+                        "tag",
                         "recommend",
                         "frequent"
                     ]
@@ -11132,7 +11134,7 @@ const docTemplate = `{
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 }
             }
         },
@@ -11517,7 +11519,7 @@ const docTemplate = `{
                 "slug_name": {
                     "description": "slug_name",
                     "type": "string",
-                    "maxLength": 35
+                    "maxLength": 128
                 },
                 "tag_id": {
                     "description": "tag_id",

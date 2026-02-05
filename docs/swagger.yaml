@@ -259,7 +259,7 @@ definitions:
         type: string
       slug_name:
         description: slug_name
-        maxLength: 35
+        maxLength: 128
         type: string
     required:
     - display_name
@@ -1705,6 +1705,7 @@ definitions:
         - hot
         - score
         - unanswered
+        - tag
         - recommend
         - frequent
         type: string
@@ -2506,7 +2507,7 @@ definitions:
         type: string
       slug_name:
         description: slug_name
-        maxLength: 35
+        maxLength: 128
         type: string
     type: object
   schema.TagResp:
@@ -2770,7 +2771,7 @@ definitions:
         type: string
       slug_name:
         description: slug_name
-        maxLength: 35
+        maxLength: 128
         type: string
       tag_id:
         description: tag_id
@@ -5869,6 +5870,7 @@ paths:
         - hot
         - score
         - unanswered
+        - tag
         - recommend
         - frequent
         in: query

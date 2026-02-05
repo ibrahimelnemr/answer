@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apache/answer/internal/service/eventqueue"
+	"github.com/apache/answer/internal/service/event_queue"
 	"github.com/apache/answer/plugin"
 
 	"github.com/apache/answer/internal/base/constant"
@@ -38,13 +38,13 @@ import (
 	"github.com/apache/answer/internal/schema"
 	"github.com/apache/answer/internal/service/activity"
 	"github.com/apache/answer/internal/service/activity_common"
-	"github.com/apache/answer/internal/service/activityqueue"
+	"github.com/apache/answer/internal/service/activity_queue"
 	answercommon "github.com/apache/answer/internal/service/answer_common"
 	collectioncommon "github.com/apache/answer/internal/service/collection_common"
 	"github.com/apache/answer/internal/service/config"
 	"github.com/apache/answer/internal/service/export"
 	metacommon "github.com/apache/answer/internal/service/meta_common"
-	"github.com/apache/answer/internal/service/noticequeue"
+	"github.com/apache/answer/internal/service/notice_queue"
 	"github.com/apache/answer/internal/service/notification"
 	"github.com/apache/answer/internal/service/permission"
 	questioncommon "github.com/apache/answer/internal/service/question_common"
@@ -84,14 +84,14 @@ type QuestionService struct {
 	collectionCommon                 *collectioncommon.CollectionCommon
 	answerActivityService            *activity.AnswerActivityService
 	emailService                     *export.EmailService
-	notificationQueueService         noticequeue.Service
-	externalNotificationQueueService noticequeue.ExternalService
-	activityQueueService             activityqueue.Service
+	notificationQueueService         notice_queue.NotificationQueueService
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService
+	activityQueueService             activity_queue.ActivityQueueService
 	siteInfoService                  siteinfo_common.SiteInfoCommonService
 	newQuestionNotificationService   *notification.ExternalNotificationService
 	reviewService                    *review.ReviewService
 	configService                    *config.ConfigService
-	eventQueueService                eventqueue.Service
+	eventQueueService                event_queue.EventQueueService
 	reviewRepo                       review.ReviewRepo
 }
 
@@ -110,14 +110,14 @@ func NewQuestionService(
 	collectionCommon *collectioncommon.CollectionCommon,
 	answerActivityService *activity.AnswerActivityService,
 	emailService *export.EmailService,
-	notificationQueueService noticequeue.Service,
-	externalNotificationQueueService noticequeue.ExternalService,
-	activityQueueService activityqueue.Service,
+	notificationQueueService notice_queue.NotificationQueueService,
+	externalNotificationQueueService notice_queue.ExternalNotificationQueueService,
+	activityQueueService activity_queue.ActivityQueueService,
 	siteInfoService siteinfo_common.SiteInfoCommonService,
 	newQuestionNotificationService *notification.ExternalNotificationService,
 	reviewService *review.ReviewService,
 	configService *config.ConfigService,
-	eventQueueService eventqueue.Service,
+	eventQueueService event_queue.EventQueueService,
 	reviewRepo review.ReviewRepo,
 ) *QuestionService {
 	return &QuestionService{
@@ -229,6 +229,15 @@ func (qs *QuestionService) AddQuestionCheckTags(ctx context.Context, tags []*ent
 	return []string{}, nil
 }
 func (qs *QuestionService) CheckAddQuestion(ctx context.Context, req *schema.QuestionAdd) (errorlist any, err error) {
+	if len(req.Tags) != 1 {
+		errorlist := make([]*validator.FormErrorField, 0)
+		errorlist = append(errorlist, &validator.FormErrorField{
+			ErrorField: "tags",
+			ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagOnlyOne),
+		})
+		err = errors.BadRequest(reason.TagOnlyOne)
+		return errorlist, err
+	}
 	minimumTags, err := qs.tagCommon.GetMinimumTags(ctx)
 	if err != nil {
 		return
@@ -301,6 +310,15 @@ func (qs *QuestionService) HasNewTag(ctx context.Context, tags []*schema.TagItem
 
 // AddQuestion add question
 func (qs *QuestionService) AddQuestion(ctx context.Context, req *schema.QuestionAdd) (questionInfo any, err error) {
+	if len(req.Tags) != 1 {
+		errorlist := make([]*validator.FormErrorField, 0)
+		errorlist = append(errorlist, &validator.FormErrorField{
+			ErrorField: "tags",
+			ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagOnlyOne),
+		})
+		err = errors.BadRequest(reason.TagOnlyOne)
+		return errorlist, err
+	}
 	minimumTags, err := qs.tagCommon.GetMinimumTags(ctx)
 	if err != nil {
 		return
@@ -656,6 +674,15 @@ func (qs *QuestionService) RemoveQuestion(ctx context.Context, req *schema.Remov
 }
 
 func (qs *QuestionService) UpdateQuestionCheckTags(ctx context.Context, req *schema.QuestionUpdate) (errorlist []*validator.FormErrorField, err error) {
+	if len(req.Tags) != 1 {
+		errorlist := make([]*validator.FormErrorField, 0)
+		errorlist = append(errorlist, &validator.FormErrorField{
+			ErrorField: "tags",
+			ErrorMsg:   translator.Tr(handler.GetLangByCtx(ctx), reason.TagOnlyOne),
+		})
+		err = errors.BadRequest(reason.TagOnlyOne)
+		return errorlist, err
+	}
 	dbinfo, has, err := qs.questionRepo.GetQuestion(ctx, req.ID)
 	if err != nil {
 		return
