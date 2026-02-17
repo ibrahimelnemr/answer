@@ -64,6 +64,24 @@ func (tr *tagCommonRepo) GetTagListByIDs(ctx context.Context, ids []string) (tag
 	return
 }
 
+// GetAllTagSlugs get all available tag slugs
+func (tr *tagCommonRepo) GetAllTagSlugs(ctx context.Context) (slugs []string, err error) {
+	list := make([]*entity.Tag, 0)
+	session := tr.data.DB.Context(ctx).Select("slug_name")
+	session.Where(builder.Eq{"status": entity.TagStatusAvailable})
+	err = session.Asc("slug_name").Find(&list)
+	if err != nil {
+		return nil, errors.InternalServer(reason.DatabaseError).WithError(err).WithStack()
+	}
+	slugs = make([]string, 0, len(list))
+	for _, tag := range list {
+		if tag.SlugName != "" {
+			slugs = append(slugs, tag.SlugName)
+		}
+	}
+	return slugs, nil
+}
+
 // GetTagBySlugName get tag by slug name
 func (tr *tagCommonRepo) GetTagBySlugName(ctx context.Context, slugName string) (tagInfo *entity.Tag, exist bool, err error) {
 	tagInfo = &entity.Tag{}

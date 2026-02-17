@@ -50,7 +50,7 @@ const Index: FC = () => {
       <NavLink
         to="/tags"
         className={() =>
-          pathname === '/tags' ? 'nav-link active' : 'nav-link'
+          pathname.startsWith('/tags') ? 'nav-link active' : 'nav-link'
         }>
         <Icon name="tags-fill" className="me-2" />
         <span>{t('header.nav.tag')}</span>

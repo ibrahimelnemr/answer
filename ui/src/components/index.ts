@@ -64,6 +64,7 @@ import CardBadge from './CardBadge';
 import PinList from './PinList';
 import MobileSideNav from './MobileSideNav';
 import AdminSideNav from './AdminSideNav';
+import HierarchicalTagBrowser from './HierarchicalTagBrowser';
 
 export {
   Avatar,
@@ -115,5 +116,6 @@ export {
   PinList,
   MobileSideNav,
   AdminSideNav,
+  HierarchicalTagBrowser,
 };
 export type { EditorRef, JSONSchema, UISchema };

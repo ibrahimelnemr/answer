@@ -1256,6 +1256,13 @@ definitions:
       updated_at:
         type: integer
     type: object
+  schema.GetTagSlugsResp:
+    properties:
+      slugs:
+        items:
+          type: string
+        type: array
+    type: object
   schema.GetTagSynonymsResp:
     properties:
       member_actions:
@@ -2495,6 +2502,31 @@ definitions:
         type: string
     required:
     - slug_name
+    type: object
+  schema.TagHierarchyOffering:
+    properties:
+      name:
+        type: string
+      specializations:
+        items:
+          $ref: '#/definitions/schema.TagHierarchySpecialization'
+        type: array
+    type: object
+  schema.TagHierarchyResp:
+    properties:
+      offerings:
+        items:
+          $ref: '#/definitions/schema.TagHierarchyOffering'
+        type: array
+    type: object
+  schema.TagHierarchySpecialization:
+    properties:
+      name:
+        type: string
+      topics:
+        items:
+          type: string
+        type: array
     type: object
   schema.TagItem:
     properties:
@@ -6820,6 +6852,24 @@ paths:
       summary: get following tag list
       tags:
       - Tag
+  /answer/api/v1/tags/hierarchy:
+    get:
+      description: get hierarchical tag tree
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.TagHierarchyResp'
+              type: object
+      summary: get hierarchical tag tree
+      tags:
+      - Tag
   /answer/api/v1/tags/page:
     get:
       description: get tag page
@@ -6864,6 +6914,24 @@ paths:
                     type: object
               type: object
       summary: get tag page
+      tags:
+      - Tag
+  /answer/api/v1/tags/slugs:
+    get:
+      description: get all tag slugs
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.RespBody'
+            - properties:
+                data:
+                  $ref: '#/definitions/schema.GetTagSlugsResp'
+              type: object
+      summary: get all tag slugs
       tags:
       - Tag
   /answer/api/v1/user/action/record:

@@ -56,6 +56,7 @@ func isHierarchicalTagSlugName(slug string) bool {
 
 type TagCommonRepo interface {
 	AddTagList(ctx context.Context, tagList []*entity.Tag) (err error)
+	GetAllTagSlugs(ctx context.Context) (slugs []string, err error)
 	GetTagListByIDs(ctx context.Context, ids []string) (tagList []*entity.Tag, err error)
 	GetTagBySlugName(ctx context.Context, slugName string) (tagInfo *entity.Tag, exist bool, err error)
 	GetTagListByName(ctx context.Context, name string, recommend, reserved bool) (tagList []*entity.Tag, err error)
@@ -175,6 +176,76 @@ func (ts *TagCommonService) SearchTagLike(ctx context.Context, req *schema.Searc
 		}
 	}
 	return resp, nil
+}
+
+// GetAllTagSlugs returns all available tag slugs.
+func (ts *TagCommonService) GetAllTagSlugs(ctx context.Context) (resp *schema.GetTagSlugsResp, err error) {
+	slugs, err := ts.tagCommonRepo.GetAllTagSlugs(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &schema.GetTagSlugsResp{Slugs: slugs}, nil
+}
+
+// GetTagHierarchy returns hierarchical tags in offering -> specialization -> topics order.
+func (ts *TagCommonService) GetTagHierarchy(ctx context.Context) (resp *schema.TagHierarchyResp, err error) {
+	slugs, err := ts.tagCommonRepo.GetAllTagSlugs(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tree := make(map[string]map[string]map[string]struct{})
+	for _, slug := range slugs {
+		parts := strings.Split(slug, ".")
+		if len(parts) != 3 {
+			continue
+		}
+		offering, spec, topic := parts[0], parts[1], parts[2]
+		if _, ok := tree[offering]; !ok {
+			tree[offering] = make(map[string]map[string]struct{})
+		}
+		if _, ok := tree[offering][spec]; !ok {
+			tree[offering][spec] = make(map[string]struct{})
+		}
+		tree[offering][spec][topic] = struct{}{}
+	}
+
+	offeringNames := make([]string, 0, len(tree))
+	for offering := range tree {
+		offeringNames = append(offeringNames, offering)
+	}
+	sort.Strings(offeringNames)
+
+	offerings := make([]*schema.TagHierarchyOffering, 0, len(offeringNames))
+	for _, offering := range offeringNames {
+		specMap := tree[offering]
+		specNames := make([]string, 0, len(specMap))
+		for spec := range specMap {
+			specNames = append(specNames, spec)
+		}
+		sort.Strings(specNames)
+
+		specs := make([]*schema.TagHierarchySpecialization, 0, len(specNames))
+		for _, spec := range specNames {
+			topicSet := specMap[spec]
+			topicNames := make([]string, 0, len(topicSet))
+			for topic := range topicSet {
+				topicNames = append(topicNames, topic)
+			}
+			sort.Strings(topicNames)
+			specs = append(specs, &schema.TagHierarchySpecialization{
+				Name:   spec,
+				Topics: topicNames,
+			})
+		}
+
+		offerings = append(offerings, &schema.TagHierarchyOffering{
+			Name:            offering,
+			Specializations: specs,
+		})
+	}
+
+	return &schema.TagHierarchyResp{Offerings: offerings}, nil
 }
 
 func (ts *TagCommonService) GetSiteWriteRecommendTag(ctx context.Context) (tags []*schema.SiteWriteTag, err error) {

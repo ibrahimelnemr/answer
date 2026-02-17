@@ -85,6 +85,30 @@ func (tc *TagController) GetTagsBySlugName(ctx *gin.Context) {
 	handler.HandleResponse(ctx, err, resp)
 }
 
+// GetTagSlugs get all tag slugs
+// @Summary get all tag slugs
+// @Description get all tag slugs
+// @Tags Tag
+// @Produce json
+// @Success 200 {object} handler.RespBody{data=schema.GetTagSlugsResp}
+// @Router /answer/api/v1/tags/slugs [get]
+func (tc *TagController) GetTagSlugs(ctx *gin.Context) {
+	resp, err := tc.tagCommonService.GetAllTagSlugs(ctx)
+	handler.HandleResponse(ctx, err, resp)
+}
+
+// GetTagHierarchy get hierarchical tag tree
+// @Summary get hierarchical tag tree
+// @Description get hierarchical tag tree
+// @Tags Tag
+// @Produce json
+// @Success 200 {object} handler.RespBody{data=schema.TagHierarchyResp}
+// @Router /answer/api/v1/tags/hierarchy [get]
+func (tc *TagController) GetTagHierarchy(ctx *gin.Context) {
+	resp, err := tc.tagCommonService.GetTagHierarchy(ctx)
+	handler.HandleResponse(ctx, err, resp)
+}
+
 // RemoveTag delete tag
 // @Summary delete tag
 // @Description delete tag

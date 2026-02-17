@@ -39,6 +39,28 @@ type SearchTagsBySlugName struct {
 	Tags string `form:"tags"`
 }
 
+// GetTagSlugsResp get all tag slugs response
+type GetTagSlugsResp struct {
+	Slugs []string `json:"slugs"`
+}
+
+// TagHierarchyResp get hierarchical tag response
+type TagHierarchyResp struct {
+	Offerings []*TagHierarchyOffering `json:"offerings"`
+}
+
+// TagHierarchyOffering top-level tag node
+type TagHierarchyOffering struct {
+	Name            string                       `json:"name"`
+	Specializations []*TagHierarchySpecialization `json:"specializations"`
+}
+
+// TagHierarchySpecialization second-level tag node
+type TagHierarchySpecialization struct {
+	Name   string   `json:"name"`
+	Topics []string `json:"topics"`
+}
+
 // GetTagInfoReq get tag info request
 type GetTagInfoReq struct {
 	// tag id

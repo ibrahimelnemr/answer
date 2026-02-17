@@ -25,7 +25,7 @@ import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 
 import { usePageTags, usePromptWithUnload } from '@/hooks';
-import { Editor, EditorRef } from '@/components';
+import { Editor, EditorRef, HierarchicalTagBrowser } from '@/components';
 import { loggedUserInfoStore } from '@/stores';
 import type * as Type from '@/common/interface';
 import { createTag } from '@/services';
@@ -284,6 +284,18 @@ const Index = () => {
               <Form.Control.Feedback type="invalid">
                 {formData.slugName.errorMsg}
               </Form.Control.Feedback>
+              <HierarchicalTagBrowser
+                onSelect={(slug) => {
+                  setFormData({
+                    ...formData,
+                    slugName: {
+                      ...formData.slugName,
+                      value: slug,
+                      isInvalid: false,
+                    },
+                  });
+                }}
+              />
             </Form.Group>
 
             <Form.Group controlId="description" className="mt-4">

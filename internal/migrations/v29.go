@@ -21,14 +21,22 @@ package migrations
 
 import (
 	"context"
+	"strings"
 
 	"xorm.io/xorm"
 )
 
 func increaseTagSlugNameLength(ctx context.Context, x *xorm.Engine) error {
 	// Increase tag.slug_name to support hierarchical slugs like a.b.c.
+	// SQLite does not enforce VARCHAR lengths and does not support ALTER TABLE ... MODIFY,
+	// so skip the column resize for SQLite.
+	driverName := strings.ToLower(x.DriverName())
+	if strings.Contains(driverName, "sqlite") {
+		return nil
+	}
+
 	type Tag struct {
-		ID       string `xorm:"not null pk comment('tag_id') BIGINT(20) id"`
+		ID              string `xorm:"not null pk comment('tag_id') BIGINT(20) id"`
 		MainTagSlugName string `xorm:"not null default '' VARCHAR(128) main_tag_slug_name"`
 		SlugName        string `xorm:"not null default '' unique VARCHAR(128) slug_name"`
 	}

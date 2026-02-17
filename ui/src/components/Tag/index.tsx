@@ -53,7 +53,7 @@ const Index: FC<IProps> = ({
         className,
       )}>
       <span className={textClassName}>
-        {data.display_name || data.slug_name}
+        {data.slug_name || data.display_name}
       </span>
     </Link>
   );

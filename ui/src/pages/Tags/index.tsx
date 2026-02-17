@@ -95,6 +95,11 @@ const Tags = () => {
                 />
               </Form.Group>
             </Form>
+            <Link
+              className="btn btn-outline-secondary btn-sm"
+              to="/tags/hierarchy">
+              Hierarchy
+            </Link>
             {role_id === 2 || role_id === 3 ? (
               <Link
                 className="btn btn-outline-primary btn-sm"

@@ -105,6 +105,7 @@ var migrations = []Migration{
 	NewMigration("v1.6.0", "move user config to interface", moveUserConfigToInterface, true),
 	NewMigration("v1.7.0", "add optional tags", addOptionalTags, true),
 	NewMigration("v1.7.1", "increase tag slug_name length", increaseTagSlugNameLength, false),
+	NewMigration("v1.7.2", "seed hierarchical tags", seedHierarchicalTags, false),
 }
 
 func GetMigrations() []Migration {

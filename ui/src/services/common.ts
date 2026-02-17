@@ -104,6 +104,22 @@ export const queryTags = (tag: string) => {
   );
 };
 
+export const getTagSlugs = () => {
+  return request.get<{ slugs: string[] }>('/answer/api/v1/tags/slugs');
+};
+
+export const useTagHierarchy = () => {
+  const apiUrl = '/answer/api/v1/tags/hierarchy';
+  const { data, error } = useSWR<Type.TagHierarchyResp>(apiUrl, (url) =>
+    request.get(url, { allow404: true }),
+  );
+  return {
+    data,
+    isLoading: !data && !error,
+    error,
+  };
+};
+
 export const useQueryAnswerInfo = (id: string) => {
   return useSWR<{
     info;

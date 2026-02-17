@@ -411,7 +411,7 @@ const TagSelector: FC<IProps> = ({
                       'badge-tag-required',
                     index === repeatIndex && 'bg-fade-out',
                   )}>
-                  {item.display_name}
+                  {item.slug_name || item.display_name}
                   <span
                     className="ms-1 hover-hand"
                     onMouseUp={() => handleRemove(item)}>
@@ -452,17 +452,61 @@ const TagSelector: FC<IProps> = ({
               <h6 className="dropdown-header">{t('tag_required_text')}</h6>
             )}
 
-          {tags?.map((item, index) => {
-            return (
+          {(() => {
+            if (!tags || tags.length === 0) return null;
+
+            // Group tags hierarchically by first slug segment when not searching
+            if (!searchValue) {
+              const groups: Record<string, typeof tags> = {};
+              tags.forEach((item) => {
+                const parts = item.slug_name?.split('.') || [];
+                const group = parts.length >= 2 ? parts[0] : '_other';
+                if (!groups[group]) groups[group] = [];
+                groups[group].push(item);
+              });
+
+              let globalIdx = 0;
+              return Object.keys(groups)
+                .sort()
+                .map((group) => {
+                  const groupTags = groups[group];
+                  return (
+                    <div key={group}>
+                      {group !== '_other' && (
+                        <h6 className="dropdown-header text-uppercase small">
+                          {group}
+                        </h6>
+                      )}
+                      {groupTags.map((item) => {
+                        const idx = globalIdx;
+                        globalIdx += 1;
+                        return (
+                          <Dropdown.Item
+                            key={item.slug_name}
+                            id={item.slug_name}
+                            active={idx === currentIndex}
+                            className="ps-4"
+                            onClick={() => handleClick(item)}>
+                            {item.slug_name || item.display_name}
+                          </Dropdown.Item>
+                        );
+                      })}
+                    </div>
+                  );
+                });
+            }
+
+            // When searching, show flat list
+            return tags.map((item, index) => (
               <Dropdown.Item
                 key={item.slug_name}
                 id={item.slug_name}
                 active={index === currentIndex}
                 onClick={() => handleClick(item)}>
-                {item.display_name}
+                {item.slug_name || item.display_name}
               </Dropdown.Item>
-            );
-          })}
+            ));
+          })()}
           {searchValue && tags?.length === 0 && (
             <Dropdown.Item disabled className="text-secondary">
               {t('no_result')}

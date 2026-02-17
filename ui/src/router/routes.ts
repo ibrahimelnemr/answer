@@ -137,6 +137,10 @@ const routes: RouteNode[] = [
             page: 'pages/Tags',
           },
           {
+            path: 'tags/hierarchy',
+            page: 'pages/Tags/Hierarchy',
+          },
+          {
             path: 'tags/create',
             page: 'pages/Tags/Create',
             guard: () => {

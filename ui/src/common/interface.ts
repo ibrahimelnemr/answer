@@ -78,6 +78,20 @@ export interface TagInfo extends TagBase {
   excerpt?;
   status: string;
 }
+
+export interface TagHierarchySpecialization {
+  name: string;
+  topics: string[];
+}
+
+export interface TagHierarchyOffering {
+  name: string;
+  specializations: TagHierarchySpecialization[];
+}
+
+export interface TagHierarchyResp {
+  offerings: TagHierarchyOffering[];
+}
 export interface QuestionParams extends ImgCodeReq {
   title: string;
   url_title?: string;

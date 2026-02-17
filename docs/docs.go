@@ -6066,6 +6066,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/answer/api/v1/tags/hierarchy": {
+            "get": {
+                "description": "get hierarchical tag tree",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "get hierarchical tag tree",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.TagHierarchyResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/answer/api/v1/tags/page": {
             "get": {
                 "description": "get tag page",
@@ -6135,6 +6167,38 @@ const docTemplate = `{
                                                     }
                                                 }
                                             ]
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/answer/api/v1/tags/slugs": {
+            "get": {
+                "description": "get all tag slugs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tag"
+                ],
+                "summary": "get all tag slugs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/handler.RespBody"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/schema.GetTagSlugsResp"
                                         }
                                     }
                                 }
@@ -9313,6 +9377,17 @@ const docTemplate = `{
                 }
             }
         },
+        "schema.GetTagSlugsResp": {
+            "type": "object",
+            "properties": {
+                "slugs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "schema.GetTagSynonymsResp": {
             "type": "object",
             "properties": {
@@ -11116,6 +11191,45 @@ const docTemplate = `{
                 },
                 "slug_name": {
                     "type": "string"
+                }
+            }
+        },
+        "schema.TagHierarchyOffering": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "specializations": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.TagHierarchySpecialization"
+                    }
+                }
+            }
+        },
+        "schema.TagHierarchyResp": {
+            "type": "object",
+            "properties": {
+                "offerings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.TagHierarchyOffering"
+                    }
+                }
+            }
+        },
+        "schema.TagHierarchySpecialization": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "topics": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
