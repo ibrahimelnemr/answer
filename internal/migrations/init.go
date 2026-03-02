@@ -83,6 +83,7 @@ func (m *Mentor) InitDB() error {
 	m.do("init site info write", m.initSiteInfoWrite)
 	m.do("init site info legal", m.initSiteInfoLegalConfig)
 	m.do("init default content", m.initDefaultContent)
+	m.do("seed hierarchical tags", m.initHierarchicalTags)
 	m.do("init default badges", m.initDefaultBadges)
 	return m.err
 }
@@ -550,6 +551,10 @@ func (m *Mentor) initDefaultContent() {
 	if m.err != nil {
 		return
 	}
+}
+
+func (m *Mentor) initHierarchicalTags() {
+	m.err = seedHierarchicalTags(m.ctx, m.engine)
 }
 
 func (m *Mentor) initDefaultBadges() {
