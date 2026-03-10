@@ -433,7 +433,7 @@ func (qr *questionRepo) GetQuestionPage(ctx context.Context, page, pageSize int,
 			session.Join("LEFT", "tag_rel", "question.id = tag_rel.object_id AND tag_rel.status = 1")
 		}
 		session.Join("LEFT", "tag", "tag.id = tag_rel.tag_id")
-		session.OrderBy("question.pin desc, tag.slug_name ASC, question.created_at DESC")
+		session.OrderBy("question.pin desc, COALESCE(MIN(tag.slug_name), '') ASC, question.created_at DESC")
 	case "active":
 		if inDays == 0 {
 			session.And("question.created_at > ?", time.Now().AddDate(0, 0, -180))
